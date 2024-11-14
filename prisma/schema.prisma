@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Servico {
+  id               String        @id @default(uuid())
+  tipo             TipoServico
+  status           StatusServico @default(PENDENTE)
+  descricao        String?
+  data_solicitacao DateTime      @default(now())
+  data_atualizacao DateTime      @updatedAt
+  usuarioId        String
+  created_at       DateTime?     @default(now())
+  updated_at       DateTime?     @default(now())
+  Interacao        Interacao[]
+  usuario          User          @relation(fields: [usuarioId], references: [id])
+
+  @@map("servicos")
+}
+
+model Interacao {
+  id        String   @id @default(uuid())
+  conteudo  String
+  autorId   String
+  servicoId String
+  criado_em DateTime @default(now())
+  tipo      String
+  autor     User     @relation(fields: [autorId], references: [id])
+  servico   Servico  @relation(fields: [servicoId], references: [id])
+
+  @@map("interacoes")
+}
+
+model User {
+  id             String        @id @default(uuid())
+  proces_number  String        @unique
+  name           String
+  email          String        @unique
+  user_name      String
+  nif            String
+  morada         String
+  role           Role
+  redes          String
+  tipo_pagamento TipoPagamento
+  telefone       String        @unique
+  password       String
+  created_at     DateTime?     @default(now())
+  updated_at     DateTime?     @default(now())
+  Interacao      Interacao[]
+  servicos       Servico[]
+
+  @@map("users")
+}
+
+enum TipoServico {
+  ENTREGA
+  MOTORISTA_PESSOAL
+}
+
+enum StatusServico {
+  PENDENTE
+  ACEITO
+  EM_ANDAMENTO
+  CONCLUIDO
+}
+
+enum TipoPagamento {
+  CONTA_3DIAS
+  CONTA_7DIAS
+  CONTA_15DIAS
+  CONTA_30DIAS
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
