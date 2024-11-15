@@ -1,18 +1,14 @@
 
 import { Router } from "express";
-import multer from 'multer';
 import {CreateUserController} from "./controllers/user/createUserController";
 import { AuthUserController } from "./controllers/user/AuthUSerController";
 import { DetailUserController } from "./controllers/user/DetailUserController";
 import { isAuthenticated} from "./middlewares/isAuthenticated";
-import uploadConfig from './config/multer'
 import { UserController } from "./controllers/user/ListandUpadate_deleteUserController";
 import { crudePedidoController } from "./controllers/pedido/crudePedidoController";
 import { InteracaoController } from "./controllers/Interacao/InteracaoController";
 
 const router=Router();
-
-const upload = multer(uploadConfig.upload("./tmp"));
 
 const createUserController = new CreateUserController();
 const userController = new UserController();
