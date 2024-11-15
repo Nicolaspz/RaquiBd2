@@ -28,4 +28,4 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction)=>{
     message:'Internal Error.'
   })
 })
-app.listen(process.env.PORT,()=> console.log("servidor online na porta 3333")); 
+app.listen(process.env.PORT,()=> console.log("servidor online na portaa 3333")); 
