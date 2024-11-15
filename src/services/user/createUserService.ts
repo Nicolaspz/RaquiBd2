@@ -11,7 +11,8 @@ interface UserRequest {
   nif: string;
   morada: string;
   user_name: string;
-  redes:string
+  redes: string;
+  
 }
 
 function generateRandomPassword(length = 10) {
@@ -92,7 +93,8 @@ class CreateUserService {
       nif:nif,
       morada:morada,
       user_name: user_name,
-      redes
+      redes,
+      autoPass:generatedPassword
     },
     select: {
       id: true,
