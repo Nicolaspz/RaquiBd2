@@ -15,7 +15,7 @@ class InteracaoController {
       });
       return res.json(interacao);
     } catch (error) {
-      return res.status(500).json({ error: "Erro ao criar interação", details: error.message });
+      return res.status(500).json({ error: "Erro ao criar interação" });
     }
   }
 
@@ -27,7 +27,7 @@ class InteracaoController {
       const interacoes = await interacaoService.listByServico(servicoId);
       return res.json(interacoes);
     } catch (error) {
-      return res.status(500).json({ error: "Erro ao listar interações", details: error.message });
+      return res.status(500).json({ error: "Erro ao listar interações", details: error });
     }
   }
 
@@ -40,7 +40,7 @@ class InteracaoController {
       const interacao = await interacaoService.update(id, conteudo);
       return res.json(interacao);
     } catch (error) {
-      return res.status(500).json({ error: "Erro ao atualizar interação", details: error.message });
+      return res.status(500).json({ error: "Erro ao atualizar interação", details: error });
     }
   }
 
@@ -52,7 +52,7 @@ class InteracaoController {
       await interacaoService.delete(id);
       return res.json({ message: "Interação excluída com sucesso" });
     } catch (error) {
-      return res.status(500).json({ error: "Erro ao excluir interação", details: error.message });
+      return res.status(500).json({ error: "Erro ao excluir interação", details: error });
     }
   }
 }
