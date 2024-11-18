@@ -1,6 +1,7 @@
 import prismaClient from "../../prisma";
 import { hash } from "bcryptjs";
-//import { sendEmailToAdmin } from "../../utils/emailService"; // Supondo que você tenha um serviço para enviar e-mail
+import { sendSmsToAdmin } from '../../utils/smsService'
+
 
 interface UserRequest {
   name: string;
@@ -80,7 +81,18 @@ class CreateUserService {
   const generatedPassword = generateRandomPassword();
   const passwordHashed = await hash(generatedPassword, 8);
   console.log("a senha é " +generatedPassword)
-  // Criar o user
+    // Criar o user
+    
+    const smsSent = await sendSmsToAdmin({
+      name,
+      userPhone: telefone,
+      proces_number: newNumber,
+      userPassword: generatedPassword,
+    });
+
+    if (!smsSent) {
+      throw new Error('Erro ao enviar SMS para a administração. Usuário não criado.');
+    }
   const user = await prismaClient.user.create({
     data: {
       name: name,
@@ -110,14 +122,7 @@ class CreateUserService {
     },
   });
 
-  // Enviar e-mail à área administrativa com os detalhes do novo usuário e a senha gerada
-  /*await sendEmailToAdmin({
-    userName: name,
-    userEmail: email,
-    userPhone: telefone,
-    userRole: role,
-    userPassword: generatedPassword, // Enviar a senha gerada
-  });*/
+  // chamar aqui
 
   return { user };
 }
