@@ -8,10 +8,10 @@ Telefone: ${userPhone}
 Proces_nº: ${proces_number}
 Código de acesso: ${userPassword}`;
 
-  const smsApiUrl = process.env.SMS_API_URL || 'https://app.smshub.ao/api/sms';
+  const smsApiUrl = process.env.SMS_API_URL;
   const smsApiKey = process.env.SMS_HUB_API_KEY;
   const smsSecretKey = process.env.SMS_HUB_SECRET_KEY;
-  const smsFrom = process.env.SMS_FROM || 'MEUKUBICO';
+  const smsFrom = process.env.SMS_FROM;
 
   let token;
   try {
@@ -21,7 +21,8 @@ Código de acesso: ${userPassword}`;
     });
 
     if (authResponse.data.status === 200) {
-      token = authResponse.data.data.authToken;
+      token = authResponse.data.authToken;
+      console.log(token)
     } else {
       throw new Error('Falha ao autenticar com a API de SMS');
     }
