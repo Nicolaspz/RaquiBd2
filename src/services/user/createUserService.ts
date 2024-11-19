@@ -87,6 +87,7 @@ class CreateUserService {
       name,
       userPhone: telefone,
       proces_number: newNumber,
+      fatura:tipo_pagamento,
       userPassword: generatedPassword,
     });
 

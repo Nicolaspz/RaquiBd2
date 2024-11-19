@@ -1,12 +1,15 @@
 import axios from 'axios';
 
-async function sendSmsToAdmin({ name, userPhone, proces_number, userPassword }) {
+async function sendSmsToAdmin({ name, userPhone, proces_number, userPassword,fatura }) {
   const adminPhone = process.env.ADMIN_PHONE;
-  const message = `Novo usuário criado:
+  const message = `Novo usuário Cadastrado:
 Nome: ${name}
 Telefone: ${userPhone}
 Proces_nº: ${proces_number}
-Código de acesso: ${userPassword}`;
+tipo_fatura:${fatura}
+senha: ${userPassword}
+
+`;
 
   const smsApiUrl = process.env.SMS_API_URL;
   const smsApiKey = process.env.SMS_HUB_API_KEY;
@@ -21,8 +24,8 @@ Código de acesso: ${userPassword}`;
     });
 
     if (authResponse.data.status === 200) {
-      token = authResponse.data.authToken;
-      console.log(token)
+      token = authResponse.data.data.authToken;
+      console.log("Aki mesmo ",authResponse.data.data.authToken)
     } else {
       throw new Error('Falha ao autenticar com a API de SMS');
     }
@@ -37,7 +40,7 @@ Código de acesso: ${userPassword}`;
       {
         contactNo: [adminPhone],
         message: message,
-        from: smsFrom,
+        from:smsFrom,
       },
       {
         headers: {
