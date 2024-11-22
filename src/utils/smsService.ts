@@ -67,13 +67,13 @@ senha: ${userPassword}
 }
 
 async function sendSmsToAdminFactu({message, userPhone }) {
-  const adminPhone = process.env.ADMIN_PHONE;
+  const adminPhone = userPhone;
   //const message = `Caro Cliente, o prazo de pagamento da sua factura N0º: ${fatura} está no fim.`;
 
   const smsApiUrl = process.env.SMS_API_URL;
   const smsApiKey = process.env.SMS_HUB_API_KEY;
   const smsSecretKey = process.env.SMS_HUB_SECRET_KEY;
-  const smsFrom = userPhone;
+  const smsFrom = process.env.SMS_FROM;
 
   let token;
   try {
