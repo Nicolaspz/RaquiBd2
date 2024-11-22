@@ -89,6 +89,7 @@ class CreateUserService {
       proces_number: newNumber,
       fatura:tipo_pagamento,
       userPassword: generatedPassword,
+      info:"Novo Cliente Criado"
     });
 
     if (!smsSent) {

@@ -6,6 +6,7 @@ class InteracaoController {
   async create(req: Request, res: Response) {
     const { conteudo, autorId, servicoId, tipo } = req.body;
     const interacaoService = new InteracaoService();
+
     try {
       const interacao = await interacaoService.create({
         conteudo,
@@ -13,11 +14,27 @@ class InteracaoController {
         servicoId,
         tipo,
       });
-      return res.json(interacao);
-    } catch (error) {
-      return res.status(500).json({ error: "Erro ao criar interação" });
+
+      // Verificar se a interação foi criada com sucesso
+      if (interacao) {
+        // Se a fatura foi criada ou vinculada com sucesso
+        return res.status(201).json({
+          message: "Interação criada com sucesso.",
+          interacao,
+        });
+      }
+
+      return res.status(400).json({
+        message: "Erro ao criar interação. Fatura não associada corretamente.",
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        error: "Erro ao criar interação",
+        message: error.message || "Ocorreu um erro desconhecido",
+      });
     }
   }
+
 
   // Método para listar todas as interações de um serviço específico
   async listByServico(req: Request, res: Response) {

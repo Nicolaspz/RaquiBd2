@@ -1,77 +1,100 @@
-import prismaClient from "../../prisma";
+import { PrismaClient } from "@prisma/client";
+import moment from "moment";
 
-interface CreateInteracaoRequest {
-  conteudo: string;
-  autorId: string; // ID do autor da interação
-  servicoId: string; // ID do serviço ao qual pertence a interação
-  tipo: string // Enum ou string para tipo de interação
-}
+const prisma = new PrismaClient();
 
-interface InteracaoResponse {
-  id: string;
+interface InteracaoData {
   conteudo: string;
   autorId: string;
   servicoId: string;
-  criado_em: Date;
   tipo: string;
 }
 
-class InteracaoService {
-  // Método para criar uma nova interação
-  async create({ conteudo, autorId, servicoId, tipo }: CreateInteracaoRequest){
-    const interacao = await prismaClient.interacao.create({
-      data: {
-        conteudo,
-        autorId,
-        servicoId,
-        tipo,
-      },
-      select: { // Seleciona os campos que deseja retornar
-        id: true,
-        conteudo: true,
-        autorId: true,
-        servicoId: true,
-        criado_em: true,
-        tipo: true,
-      },
+export class InteracaoService {
+  // Método para criar uma interação
+  async create({ conteudo, autorId, servicoId, tipo }: InteracaoData) {
+    // Verificar se o serviço já possui interações
+    const servico = await prisma.servico.findUnique({
+      where: { id: servicoId },
+      include: { Interacao: true, Fatura: true },
     });
-    return interacao;
-  }
 
-  // Método para listar todas as interações de um serviço específico
-  async listByServico(servicoId: string){
-    const interacoes = await prismaClient.interacao.findMany({
+    if (!servico) throw new Error("Serviço não encontrado.");
+
+    // Caso já tenha interações, apenas adicionar a interação
+    if (servico.Interacao.length > 0) {
+      return prisma.interacao.create({
+        data: { conteudo, autorId, servicoId, tipo },
+      });
+    }
+
+    // Se não houver interações, verificar fatura ativa do usuário
+    let faturaAberta = await prisma.fatura.findFirst({
       where: {
-        servicoId,
-      },
-      select: {
-        id: true,
-        conteudo: true,
-        autorId: true,
-        servicoId: true,
-        criado_em: true,
-        tipo: true,
+        usuarioId: servico.usuarioId,
+        status: "ABERTA",
       },
     });
-    return interacoes;
+
+          const usuario = await prisma.user.findUnique({
+        where: { id: servico.usuarioId },
+      });
+      if (!usuario) throw new Error("Usuário relacionado ao serviço não encontrado.");
+
+    if (!faturaAberta) {
+      // Criar nova fatura caso não exista nenhuma aberta
+      const dataVencimento = this.calcularVencimento(usuario.tipo_pagamento);
+      faturaAberta = await prisma.fatura.create({
+        data: {
+          numero: `FAT-${Date.now()}`,
+          usuarioId: servico.usuarioId,
+          data_vencimento: dataVencimento,
+          servicos: { connect: { id: servicoId } },
+        },
+      });
+    } else {
+      // Vincular o serviço à fatura existente
+      await prisma.servico.update({
+        where: { id: servicoId },
+        data: { faturaId: faturaAberta.id },
+      });
+    }
+
+    // Criar a interação
+    return prisma.interacao.create({
+      data: { conteudo, autorId, servicoId, tipo },
+    });
   }
 
-  async update(id: string, conteudo: string){
-    const interacao = await prismaClient.interacao.update({
-      where: { id },
-      data: {conteudo},
-      select: { id: true, conteudo: true, autorId: true, servicoId: true, criado_em: true, tipo: true },
+  // Método para listar interações de um serviço
+  async listByServico(servicoId: string) {
+    return prisma.interacao.findMany({
+      where: { servicoId },
+      orderBy: { criado_em: "asc" },
     });
-    return interacao;
+  }
+
+  // Método para atualizar uma interação
+  async update(id: string, conteudo: string) {
+    return prisma.interacao.update({
+      where: { id },
+      data: { conteudo },
+    });
   }
 
   // Método para excluir uma interação
   async delete(id: string) {
-    await prismaClient.interacao.delete({
-      where: { id },
-    });
+    await prisma.interacao.delete({ where: { id } });
   }
 
+  // Função para calcular vencimento da fatura
+  private calcularVencimento(tipoPagamento: string): Date {
+    const dias = {
+      CONTA_3DIAS: 3,
+      CONTA_7DIAS: 7,
+      CONTA_15DIAS: 15,
+      CONTA_30DIAS: 30,
+    };
+    return moment().add(dias[tipoPagamento] || 7, "days").toDate();
+  }
 }
-
-export { InteracaoService };

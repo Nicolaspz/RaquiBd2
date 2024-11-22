@@ -19,6 +19,8 @@ model Servico {
   updated_at       DateTime?     @default(now())
   Interacao        Interacao[]
   usuario          User          @relation(fields: [usuarioId], references: [id])
+  Fatura           Fatura?       @relation(fields: [faturaId], references: [id])
+  faturaId         String?
 
   @@map("servicos")
 }
@@ -34,6 +36,23 @@ model Interacao {
   servico   Servico  @relation(fields: [servicoId], references: [id])
 
   @@map("interacoes")
+}
+
+model Fatura {
+  id              String       @id @default(uuid())
+  numero          String       @unique
+  usuarioId       String
+  usuario         User         @relation(fields: [usuarioId], references: [id])
+  data_criacao    DateTime     @default(now())
+  data_vencimento DateTime
+  servicos        Servico[]
+  status          StatusFatura @default(ABERTA)
+}
+
+enum StatusFatura {
+  ABERTA
+  PAGA
+  CANCELADA
 }
 
 model User {
@@ -54,6 +73,7 @@ model User {
   updated_at     DateTime?     @default(now())
   Interacao      Interacao[]
   servicos       Servico[]
+  Fatura         Fatura[]
 
   @@map("users")
 }
