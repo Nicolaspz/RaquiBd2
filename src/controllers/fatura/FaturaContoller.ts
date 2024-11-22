@@ -49,8 +49,8 @@ const faturaService = new FaturaService();
     
     // Retornando os logs na resposta
     return res.status(200).json({
-      message: "Verificação de vencimento concluída.",
-      logs: logs  // Adicionando os logs no retorno
+      message: logs,
+      //logs: logs  // Adicionando os logs no retorno
     });
   } catch (error) {
     console.error("Erro ao verificar vencimento:", error);
