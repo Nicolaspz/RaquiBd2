@@ -7,9 +7,11 @@ import { isAuthenticated} from "./middlewares/isAuthenticated";
 import { UserController } from "./controllers/user/ListandUpadate_deleteUserController";
 import { crudePedidoController } from "./controllers/pedido/crudePedidoController";
 import { InteracaoController } from "./controllers/Interacao/InteracaoController";
+import { FaturaController} from "./controllers/fatura/FaturaContoller";
 
 const router=Router();
 
+const faturaController = new FaturaController();
 const createUserController = new CreateUserController();
 const userController = new UserController();
 const Authcontroller =new AuthUserController();
@@ -46,6 +48,12 @@ router.post("/interacoes", interacaoController.create);
 router.get("/interacoes", interacaoController.listByServico);
 router.put("/interacoes/:id", interacaoController.update);
 router.delete("/interacoes/:id", interacaoController.delete);
+
+//fatura
+router.get("/fatura", faturaController.listar); // Listar faturas
+router.delete("/:id", faturaController.eliminar); // Eliminar fatura
+router.patch("/:id/fechar", faturaController.fechar); // Fechar fatura
+
 
 router.get('/ping', (req, res) => {
   res.send('Server is running ++');

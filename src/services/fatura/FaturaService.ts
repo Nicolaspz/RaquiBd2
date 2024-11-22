@@ -5,11 +5,38 @@ import { sendSmsToAdminFactu } from "../../utils/smsService";
 const prisma = new PrismaClient();
 
 export class FaturaService {
-  // Verificar faturas com vencimento próximo e enviar SMS
+  // Listar faturas com seus serviços e interações
+  async listarFaturasComServicosEInteracoes() {
+    return await prisma.fatura.findMany({
+      include: {
+        servicos: {
+          include: {
+            Interacao: true, // Inclui as interações relacionadas a cada serviço
+          },
+        },
+      },
+    });
+  }
+
+  // Eliminar fatura pelo ID
+  async eliminarFatura(faturaId: string) {
+    return await prisma.fatura.delete({
+      where: { id: faturaId },
+    });
+  }
+
+  // Fechar fatura pelo ID
+  async fecharFatura(faturaId: string) {
+    return await prisma.fatura.update({
+      where: { id: faturaId },
+      data: { status: "PAGA" },
+    });
+  }
+
+  // Verificar vencimento das faturas e enviar SMS
   async verificarVencimento() {
     const hoje = moment().startOf("day");
 
-    // Buscar faturas que vencem amanhã
     const faturas = await prisma.fatura.findMany({
       where: {
         status: "ABERTA",
@@ -17,9 +44,7 @@ export class FaturaService {
       },
     });
 
-    // Iterar pelas faturas
     for (const fatura of faturas) {
-      // Buscar o usuário associado ao `usuarioId` da fatura
       const usuario = await prisma.user.findUnique({
         where: { id: fatura.usuarioId },
       });
@@ -34,14 +59,12 @@ export class FaturaService {
         continue;
       }
 
-      // Criar mensagem personalizada
       const mensagem = `Prezado(a) ${usuario.name}, sua fatura número ${fatura.numero} vencerá amanhã. Por favor, realize o pagamento para evitar atrasos.`;
 
-      // Enviar SMS
       try {
         const smsSent = await sendSmsToAdminFactu({
           message: mensagem,
-          userPhone: usuario.telefone, // Número de telefone do usuário
+          userPhone: usuario.telefone,
         });
 
         if (!smsSent) {
