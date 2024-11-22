@@ -15,6 +15,16 @@ const faturaService = new FaturaService();
     }
    }
   
+   async listarById(req: Request, res: Response) {
+      const { IdUser} = req.params;
+    try {
+      const faturas = await faturaService.listarFaturasComServicosEInteracoesById(IdUser);
+      return res.status(200).json(faturas);
+    } catch (error) {
+      console.error("Erro ao listar faturas:", error);
+      return res.status(500).json({ message: "Erro ao listar faturas" });
+    }
+   }
 
   // Eliminar uma fatura
   async eliminar(req: Request, res: Response) {

@@ -18,6 +18,21 @@ export class FaturaService {
     });
   }
 
+  async listarFaturasComServicosEInteracoesById(usuarioId: string) {
+    return await prisma.fatura.findMany({
+      where: {
+        usuarioId,
+      },
+      include: {
+        servicos: {
+          include: {
+            Interacao: true, // Inclui as interações relacionadas a cada serviço
+          },
+        },
+      },
+    });
+  }
+
   // Eliminar fatura pelo ID
   async eliminarFatura(faturaId: string) {
     return await prisma.fatura.delete({

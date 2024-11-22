@@ -51,6 +51,7 @@ router.delete("/interacoes/:id",isAuthenticated, interacaoController.delete);
 
 //fatura
 router.get("/fatura",isAuthenticated, faturaController.listar); // Listar faturas
+router.get("/fatura/:IdUser",isAuthenticated, faturaController.listarById); // Listar faturas
 router.delete("/:id",isAuthenticated, faturaController.eliminar); // Eliminar fatura
 router.patch("/:id/fechar",isAuthenticated, faturaController.fechar); // Fechar fatura
 router.get("/verificar", faturaController.executarVerificacao); 
