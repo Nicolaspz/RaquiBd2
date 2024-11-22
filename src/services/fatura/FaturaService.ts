@@ -36,14 +36,15 @@ export class FaturaService {
   // Verificar vencimento das faturas e enviar SMS
 
   // Armazenar logs
-  private logs: string[] = [];
+ 
 
   async verificarVencimento() {
+     const logs: string[] = [];
   const hoje = moment().startOf("day"); // Zera a parte da hora para hoje começar à meia-noite
   const amanha = moment().add(1, "day").startOf("day"); // A mesma coisa para amanhã
   
   // Adicionando log de início
-  this.logs.push("Iniciando verificação de vencimento.");
+  logs.push("Iniciando verificação de vencimento.");
 
   const faturas = await prisma.fatura.findMany({
     where: {
