@@ -57,8 +57,8 @@ export class FaturaService {
   });
 
   if (faturas.length === 0) {
-    this.logs.push("Nenhuma fatura a vencer amanhã.");
-    return this.logs;
+    logs.push("Nenhuma fatura a vencer amanhã.");
+    return logs;
   }
 
   // Se houver faturas, prossiga
@@ -68,12 +68,12 @@ export class FaturaService {
     });
 
     if (!usuario) {
-      this.logs.push(`Usuário com ID ${fatura.usuarioId} não encontrado para a fatura ${fatura.numero}.`);
+      logs.push(`Usuário com ID ${fatura.usuarioId} não encontrado para a fatura ${fatura.numero}.`);
       continue;
     }
 
     if (!usuario.telefone) {
-      this.logs.push(`Usuário ${usuario.name} não possui número de telefone cadastrado.`);
+      logs.push(`Usuário ${usuario.name} não possui número de telefone cadastrado.`);
       continue;
     }
 
@@ -86,17 +86,17 @@ export class FaturaService {
       });
 
       if (!smsSent) {
-        this.logs.push(`Falha ao enviar SMS para o usuário ${usuario.name}.`);
+        logs.push(`Falha ao enviar SMS para o usuário ${usuario.name}.`);
         continue;
       }
 
-      this.logs.push(`SMS enviado com sucesso para o usuário ${usuario.name}`);
+      logs.push(`SMS enviado com sucesso para o usuário ${usuario.name}`);
     } catch (error) {
-      this.logs.push(`Erro ao enviar SMS para o usuário ${usuario.name}: ${error}`);
+      logs.push(`Erro ao enviar SMS para o usuário ${usuario.name}: ${error}`);
     }
   }
 
-  return this.logs;  // Retorna os logs ao controlador
+  return logs;  // Retorna os logs ao controlador
 }
 
 }
