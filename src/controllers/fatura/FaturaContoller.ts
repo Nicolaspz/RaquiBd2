@@ -42,15 +42,25 @@ const faturaService = new FaturaService();
     }
    }
    
-   async executarVerificacao(req: Request, res: Response){
+  async executarVerificacao(req: Request, res: Response) {
   try {
-    await faturaService.verificarVencimento();
-    return res.status(200).json({ message: "Verificação de vencimento concluída." });
+    // Executando a verificação e pegando os logs do serviço
+    const logs = await faturaService.verificarVencimento;
+    
+    // Retornando os logs na resposta
+    return res.status(200).json({
+      message: "Verificação de vencimento concluída.",
+      logs: logs  // Adicionando os logs no retorno
+    });
   } catch (error) {
     console.error("Erro ao verificar vencimento:", error);
-    return res.status(500).json({ message: "Erro ao executar verificação de vencimento." });
+    return res.status(500).json({
+      message: "Erro ao executar verificação de vencimento.",
+      error: error.message
+    });
   }
-   };
+}
+
    
 }
 export {FaturaController}

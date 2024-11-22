@@ -34,55 +34,65 @@ export class FaturaService {
   }
 
   // Verificar vencimento das faturas e enviar SMS
+
+  // Armazenar logs
+  private logs: string[] = [];
+
   async verificarVencimento() {
-  const hoje = moment().startOf("day");
+    const hoje = moment().startOf("day");
 
-  const faturas = await prisma.fatura.findMany({
-    where: {
-      status: "ABERTA",
-      data_vencimento: hoje.add(1, "day").toDate(),
-    },
-  });
+    // Adicionando um log de início
+    this.logs.push("Iniciando verificação de vencimento.");
 
-  // Verifica se não há faturas a expirar
-  if (faturas.length === 0) {
-    console.log("Não há faturas com vencimento para amanhã.");
-    return; // Se não houver faturas, sai do método
-  }
-
-  for (const fatura of faturas) {
-    const usuario = await prisma.user.findUnique({
-      where: { id: fatura.usuarioId },
+    const faturas = await prisma.fatura.findMany({
+      where: {
+        status: "ABERTA",
+        data_vencimento: hoje.add(1, "day").toDate(),
+      },
     });
 
-    if (!usuario) {
-      console.log(`Usuário com ID ${fatura.usuarioId} não encontrado para a fatura ${fatura.numero}.`);
-      continue;
+    if (faturas.length === 0) {
+      this.logs.push("Nenhuma fatura a vencer amanhã.");
+      return this.logs;  // Retornar os logs ao controlador
     }
 
-    if (!usuario.telefone) {
-      console.log(`Usuário ${usuario.name} não possui número de telefone cadastrado.`);
-      continue;
-    }
-
-    const mensagem = `Prezado(a) ${usuario.name}, sua fatura número ${fatura.numero} vencerá amanhã. Por favor, realize o pagamento para evitar atrasos.`;
-
-    try {
-      const smsSent = await sendSmsToAdminFactu({
-        message: mensagem,
-        userPhone: usuario.telefone,
+    for (const fatura of faturas) {
+      const usuario = await prisma.user.findUnique({
+        where: { id: fatura.usuarioId },
       });
 
-      if (!smsSent) {
-        console.log(`Falha ao enviar SMS para o usuário ${usuario.name}.`);
+      if (!usuario) {
+        this.logs.push(`Usuário com ID ${fatura.usuarioId} não encontrado para a fatura ${fatura.numero}.`);
         continue;
       }
 
-      console.log(`SMS enviado com sucesso para o usuário ${usuario.name}`);
-    } catch (error) {
-      console.log(`Erro ao enviar SMS para o usuário ${usuario.name}:`, error);
+      if (!usuario.telefone) {
+        this.logs.push(`Usuário ${usuario.name} não possui número de telefone cadastrado.`);
+        continue;
+      }
+
+      const mensagem = `Prezado(a) ${usuario.name}, sua fatura número ${fatura.numero} vencerá amanhã. Por favor, realize o pagamento para evitar atrasos.`;
+
+      try {
+        const smsSent = await sendSmsToAdminFactu({
+          message: mensagem,
+          userPhone: usuario.telefone,
+        });
+
+        if (!smsSent) {
+          this.logs.push(`Falha ao enviar SMS para o usuário ${usuario.name}.`);
+          continue;
+        }
+
+        this.logs.push(`SMS enviado com sucesso para o usuário ${usuario.name}`);
+      } catch (error) {
+        this.logs.push(`Erro ao enviar SMS para o usuário ${usuario.name}: ${error}`);
+      }
     }
+
+    return this.logs;  // Retornar os logs ao controlador
   }
 }
 
-}
+
+
