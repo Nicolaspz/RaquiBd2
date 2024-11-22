@@ -40,6 +40,17 @@ const faturaService = new FaturaService();
       console.error("Erro ao fechar fatura:", error);
       return res.status(500).json({ message: "Erro ao fechar fatura" });
     }
+   }
+   
+   async executarVerificacao(req: Request, res: Response){
+  try {
+    await faturaService.verificarVencimento();
+    return res.status(200).json({ message: "Verificação de vencimento concluída." });
+  } catch (error) {
+    console.error("Erro ao verificar vencimento:", error);
+    return res.status(500).json({ message: "Erro ao executar verificação de vencimento." });
   }
+   };
+   
 }
 export {FaturaController}

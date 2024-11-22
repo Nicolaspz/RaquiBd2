@@ -5,6 +5,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import http from 'http'; // Para criar o servidor HTTP
 import { Server } from 'socket.io'; // Socket.IO
+import { scheduleTasks } from "./cron/cronJobs";
 
 dotenv.config();
 
@@ -62,6 +63,8 @@ io.on("connection", (socket) => {
   });
 });
 
+// Configurar os cron jobs
+scheduleTasks();
 // Inicia o servidor na porta especificada
 const PORT = process.env.PORT || 3333;
 server.listen(PORT, () => console.log(`Servidor online na porta ${PORT}`));

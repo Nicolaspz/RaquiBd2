@@ -44,15 +44,15 @@ router.get('/pedido_user/:IdUser', isAuthenticated, pedidoController.listByIdUSe
 
 
 //Interacões
-router.post("/interacoes", interacaoController.create);
-router.get("/interacoes", interacaoController.listByServico);
-router.put("/interacoes/:id", interacaoController.update);
-router.delete("/interacoes/:id", interacaoController.delete);
+router.post("/interacoes",isAuthenticated, interacaoController.create);
+router.get("/interacoes", isAuthenticated,interacaoController.listByServico);
+router.put("/interacoes/:id",isAuthenticated, interacaoController.update);
+router.delete("/interacoes/:id",isAuthenticated, interacaoController.delete);
 
 //fatura
-router.get("/fatura", faturaController.listar); // Listar faturas
-router.delete("/:id", faturaController.eliminar); // Eliminar fatura
-router.patch("/:id/fechar", faturaController.fechar); // Fechar fatura
+router.get("/fatura",isAuthenticated, faturaController.listar); // Listar faturas
+router.delete("/:id",isAuthenticated, faturaController.eliminar); // Eliminar fatura
+router.patch("/:id/fechar",isAuthenticated, faturaController.fechar); // Fechar fatura
 
 
 router.get('/ping', (req, res) => {
