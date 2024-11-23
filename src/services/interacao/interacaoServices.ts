@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import moment from "moment";
+import { sendSmsToAdminFactu } from '../../utils/smsService'
 
 const prisma = new PrismaClient();
 
@@ -52,6 +53,21 @@ export class InteracaoService {
           servicos: { connect: { id: servicoId } },
         },
       });
+
+      const mensagem = `Prezado(a) ${usuario.name}, a sua solicitação foi aceite. Abra o App para mais detalhes. Obrigado!`;
+      try {
+        const smsSent = await sendSmsToAdminFactu({
+          message: mensagem,
+          userPhone: usuario.telefone,
+        });
+
+        if (!smsSent) {
+          console.log(`Falha ao enviar SMS para o usuário ${usuario.name}.`);
+        }
+      } catch (error) {
+        console.error(`Erro ao enviar SMS para o usuário ${usuario.name}:`, error);
+      }
+      
     } else {
       // Vincular o serviço à fatura existente
       await prisma.servico.update({
