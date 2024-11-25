@@ -59,10 +59,10 @@ model User {
   id             String        @id @default(uuid())
   proces_number  String        @unique
   name           String
-  email          String        @unique
+  email          String?       @unique
   user_name      String
   nif            String
-  morada         String
+  morada         String?
   role           Role
   redes          String
   tipo_pagamento TipoPagamento
@@ -79,8 +79,10 @@ model User {
 }
 
 enum TipoServico {
-  ENTREGA
-  MOTORISTA_PESSOAL
+  SERVICO_ENTREGA
+  SERVICO_PESSOAL
+  SERVICO_24h
+  SERVICO_30_DIAS
 }
 
 enum StatusServico {
@@ -100,4 +102,5 @@ enum TipoPagamento {
 enum Role {
   ADMIN
   CLIENT
+  SUPER_ADMIN
 }

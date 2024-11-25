@@ -1,4 +1,5 @@
 import prismaClient from "../../prisma";
+import {sendSmsPddo} from "../../utils/smsService"
 
 interface CreateServicoRequest {
   descricao?: string; // Alterado para opcional, conforme o modelo
@@ -40,8 +41,17 @@ class ServicoService {
         created_at:true,
         
       },
+
     });
-    console.log(servico);
+
+    //console.log(servico);
+
+    if(servico){
+      
+      sendSmsPddo();
+      
+    }
+
 
     return { servico }; // Retorna o serviço diretamente
   }
