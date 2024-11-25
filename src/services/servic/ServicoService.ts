@@ -47,10 +47,11 @@ class ServicoService {
     //console.log(servico);
 
     if(servico){
-      
-      sendSmsPddo();
-      
-    }
+        const smsSent = await sendSmsPddo();
+        if (!smsSent) {
+          console.log("Falha ao enviar SMS.");
+        }
+      }
 
 
     return { servico }; // Retorna o serviço diretamente
