@@ -30,6 +30,25 @@ export class InteracaoService {
     }
 
     // Se não houver interações, verificar fatura ativa do usuário
+    const usuario = await prisma.user.findUnique({
+        where: { id: servico.usuarioId },
+      });
+    if (!usuario) throw new Error("Usuário relacionado ao serviço não encontrado.");
+    
+    const mensagem = `Prezado(a) ${usuario.name}, a sua solicitação foi aceite. Abra o App para mais detalhes. Obrigado!`;
+      try {
+        const smsSent = await sendSmsToAdminFactu({
+          message: mensagem,
+          userPhone: usuario.telefone,
+        });
+
+        if (!smsSent) {
+          console.log(`Falha ao enviar SMS para o usuário ${usuario.name}.`);
+        }
+      } catch (error) {
+        console.error(`Erro ao enviar SMS para o usuário ${usuario.name}:`, error);
+      }
+
     let faturaAberta = await prisma.fatura.findFirst({
       where: {
         usuarioId: servico.usuarioId,
@@ -37,10 +56,7 @@ export class InteracaoService {
       },
     });
 
-          const usuario = await prisma.user.findUnique({
-        where: { id: servico.usuarioId },
-      });
-      if (!usuario) throw new Error("Usuário relacionado ao serviço não encontrado.");
+          
 
     if (!faturaAberta) {
       // Criar nova fatura caso não exista nenhuma aberta
@@ -54,19 +70,7 @@ export class InteracaoService {
         },
       });
 
-      const mensagem = `Prezado(a) ${usuario.name}, a sua solicitação foi aceite. Abra o App para mais detalhes. Obrigado!`;
-      try {
-        const smsSent = await sendSmsToAdminFactu({
-          message: mensagem,
-          userPhone: usuario.telefone,
-        });
-
-        if (!smsSent) {
-          console.log(`Falha ao enviar SMS para o usuário ${usuario.name}.`);
-        }
-      } catch (error) {
-        console.error(`Erro ao enviar SMS para o usuário ${usuario.name}:`, error);
-      }
+      
       
     } else {
       // Vincular o serviço à fatura existente
