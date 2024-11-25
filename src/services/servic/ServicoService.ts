@@ -5,8 +5,13 @@ interface CreateServicoRequest {
   descricao?: string; // Alterado para opcional, conforme o modelo
   status?: 'PENDENTE' | 'CONCLUIDO'; // Alinhado com o enum do Prisma
   usuarioId: string; // ID do usuário que cria o serviço
-  tipo: 'ENTREGA' | 'MOTORISTA_PESSOAL';
+  tipo: 'SERVICO_ENTREGA' | 'SERVICO_PESSOAL' |'SERVICO_24h' | 'SERVICO_30_DIAS';
 }
+/*
+SERVICO_ENTREGA
+  SERVICO_PESSOAL
+  SERVICO_24h
+  SERVICO_30_DIAS */
 
 interface UpdateServicoRequest {
   id: string;
