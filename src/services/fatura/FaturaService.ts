@@ -14,6 +14,12 @@ export class FaturaService {
             Interacao: true, // Inclui as interações relacionadas a cada serviço
           },
         },
+        usuario: {
+          select: {
+            name: true,
+            proces_number:true,
+          }
+        }
       },
     });
   }
@@ -24,11 +30,19 @@ export class FaturaService {
         usuarioId,
       },
       include: {
+      
         servicos: {
+          
           include: {
             Interacao: true, // Inclui as interações relacionadas a cada serviço
           },
         },
+        usuario: {
+          select: {
+            name: true,
+            proces_number:true
+          }
+        }
       },
     });
   }
