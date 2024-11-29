@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import http from "http"; // Para criar o servidor HTTP
 import { Server } from "socket.io"; // Socket.IO
 
+
 dotenv.config();
 
 const app = express();
@@ -13,10 +14,14 @@ const app = express();
 // Cria o servidor HTTP
 const server = http.createServer(app);
 
+const corsOptions = {
+  origin: ["http://localhost:8081", "https://raqui.vercel.app"], // Adiciona a URL do frontend aqui
+  methods: ["GET", "POST"],
+};
 // Configura o Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: "*", // Substitua pelo domínio do front-end em produção
+    origin: "http://localhost:8081", // Substitua pelo domínio do front-end em produção
     methods: ["GET", "POST"],
   },
 });
@@ -25,7 +30,7 @@ const io = new Server(server, {
 let faturas: any[] = [];
 
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(router);
 
 // Middleware de tratamento de erros
