@@ -14,49 +14,63 @@ interface InteracaoData {
 export class InteracaoService {
   // Método para criar uma interação
   async create({ conteudo, autorId, servicoId, tipo }: InteracaoData) {
-    // Verificar se o serviço já possui interações
-    const servico = await prisma.servico.findUnique({
-      where: { id: servicoId },
-      include: { Interacao: true, Fatura: true },
+  // Verificar se o serviço já possui interações
+  const servico = await prisma.servico.findUnique({
+    where: { id: servicoId },
+    include: { Interacao: true, Fatura: true },
+  });
+
+  if (!servico) throw new Error("Serviço não encontrado.");
+
+  // Caso já tenha interações, apenas adicionar a interação
+  if (servico.Interacao.length > 0) {
+    return prisma.interacao.create({
+      data: { conteudo, autorId, servicoId, tipo },
+    });
+  }
+
+  // Enviar notificação SMS para o usuário relacionado ao serviço
+  const usuario = await prisma.user.findUnique({
+    where: { id: servico.usuarioId },
+  });
+  if (!usuario) throw new Error("Usuário relacionado ao serviço não encontrado.");
+
+  const mensagem = `Prezado(a) ${usuario.name}, a sua solicitação foi aceite. Abra o App para mais detalhes. Obrigado!`;
+  try {
+    const smsSent = await sendSmsToAdminFactu({
+      message: mensagem,
+      userPhone: usuario.telefone,
     });
 
-    if (!servico) throw new Error("Serviço não encontrado.");
-
-    // Caso já tenha interações, apenas adicionar a interação
-    if (servico.Interacao.length > 0) {
-      return prisma.interacao.create({
-        data: { conteudo, autorId, servicoId, tipo },
-      });
+    if (!smsSent) {
+      console.log(`Falha ao enviar SMS para o usuário ${usuario.name}.`);
     }
+  } catch (error) {
+    console.error(`Erro ao enviar SMS para o usuário ${usuario.name}:`, error);
+  }
 
-    // Se não houver interações, verificar fatura ativa do usuário
-    const usuario = await prisma.user.findUnique({
-        where: { id: servico.usuarioId },
-      });
-    if (!usuario) throw new Error("Usuário relacionado ao serviço não encontrado.");
-    
-    const mensagem = `Prezado(a) ${usuario.name}, a sua solicitação foi aceite. Abra o App para mais detalhes. Obrigado!`;
-      try {
-        const smsSent = await sendSmsToAdminFactu({
-          message: mensagem,
-          userPhone: usuario.telefone,
-        });
+  // Lógica para criação de fatura
+  let faturaAberta = null;
 
-        if (!smsSent) {
-          console.log(`Falha ao enviar SMS para o usuário ${usuario.name}.`);
-        }
-      } catch (error) {
-        console.error(`Erro ao enviar SMS para o usuário ${usuario.name}:`, error);
-      }
-
-    let faturaAberta = await prisma.fatura.findFirst({
+  if (servico.tipo === "SERVICO_24h" || servico.tipo === "SERVICO_30_DIAS") {
+    // Criar uma nova fatura SEMPRE para SERVICO_24h e SERVICO_30_DIAS
+    const dataVencimento = this.calcularVencimento(servico.tipo);
+    faturaAberta = await prisma.fatura.create({
+      data: {
+        numero: `FAT-${Date.now()}`,
+        usuarioId: servico.usuarioId,
+        data_vencimento: dataVencimento,
+        servicos: { connect: { id: servicoId } },
+      },
+    });
+  } else {
+    // Para os outros tipos de serviço, verificar se existe fatura aberta
+    faturaAberta = await prisma.fatura.findFirst({
       where: {
         usuarioId: servico.usuarioId,
         status: "ABERTA",
       },
     });
-
-          
 
     if (!faturaAberta) {
       // Criar nova fatura caso não exista nenhuma aberta
@@ -69,9 +83,6 @@ export class InteracaoService {
           servicos: { connect: { id: servicoId } },
         },
       });
-
-      
-      
     } else {
       // Vincular o serviço à fatura existente
       await prisma.servico.update({
@@ -79,12 +90,14 @@ export class InteracaoService {
         data: { faturaId: faturaAberta.id },
       });
     }
-
-    // Criar a interação
-    return prisma.interacao.create({
-      data: { conteudo, autorId, servicoId, tipo },
-    });
   }
+
+  // Criar a interação
+  return prisma.interacao.create({
+    data: { conteudo, autorId, servicoId, tipo },
+  });
+}
+
 
   // Método para listar interações de um serviço
   async listByServico(servicoId: string) {
