@@ -1,11 +1,10 @@
 import express, { Request, NextFunction, Response } from "express";
-import 'express-async-errors';
+import "express-async-errors";
 import { router } from "./routes";
-import cors from 'cors';
-import dotenv from 'dotenv';
-import http from 'http'; // Para criar o servidor HTTP
-import { Server } from 'socket.io'; // Socket.IO
-
+import cors from "cors";
+import dotenv from "dotenv";
+import http from "http"; // Para criar o servidor HTTP
+import { Server } from "socket.io"; // Socket.IO
 
 dotenv.config();
 
@@ -22,6 +21,9 @@ const io = new Server(server, {
   },
 });
 
+// Simulação de armazenamento de faturas em memória
+let faturas: any[] = [];
+
 app.use(express.json());
 app.use(cors());
 app.use(router);
@@ -34,8 +36,8 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     });
   }
   return res.status(500).json({
-    status: 'Error',
-    message: 'Internal Error.',
+    status: "Error",
+    message: "Internal Error.",
   });
 });
 
@@ -43,21 +45,34 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 io.on("connection", (socket) => {
   console.log(`Novo cliente conectado: ${socket.id}`);
 
-  // Evento para pedidos criados
-  socket.on("newOrder", (order) => {
-    console.log("Novo pedido recebido:", order);
-    // Emite o novo pedido para todos os clientes conectados
-    io.emit("newOrder", order);
+  // Envia a lista atualizada de faturas para o cliente ao conectar
+  socket.emit("updateFront", faturas);
+
+  // Evento para criar uma nova fatura
+  socket.on("newFatura", (fatura) => {
+    console.log("Nova fatura recebida:", fatura);
+
+    // Adiciona a nova fatura ao "banco de dados"
+    faturas.push(fatura);
+
+    // Emite todas as faturas atualizadas para os clientes conectados
+    io.emit("updateFront", faturas);
   });
 
-  // Evento para atualizar pedidos
-  socket.on("updateOrder", (updatedOrder) => {
-    console.log("Pedido atualizado:", updatedOrder);
-    // Emite o pedido atualizado para todos os clientes conectados
-    io.emit("updateOrder", updatedOrder);
+  // Evento para atualizar uma fatura existente
+  socket.on("updateFatura", (updatedFatura) => {
+    console.log("Fatura atualizada:", updatedFatura);
+
+    // Atualiza a fatura no "banco de dados"
+    faturas = faturas.map((fatura) =>
+      fatura.id === updatedFatura.id ? { ...fatura, ...updatedFatura } : fatura
+    );
+
+    // Emite todas as faturas atualizadas para os clientes conectados
+    io.emit("updateFront", faturas);
   });
 
-  // Desconexão do cliente
+  // Evento de desconexão do cliente
   socket.on("disconnect", () => {
     console.log(`Cliente desconectado: ${socket.id}`);
   });
@@ -65,4 +80,6 @@ io.on("connection", (socket) => {
 
 // Inicia o servidor na porta especificada
 const PORT = process.env.PORT || 3333;
-server.listen(PORT, () => console.log(`Servidor online na porta ${PORT}`));
+server.listen(PORT, () =>
+  console.log(`Servidor online na porta ${PORT}`)
+);
