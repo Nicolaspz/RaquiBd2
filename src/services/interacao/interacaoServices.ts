@@ -53,16 +53,28 @@ export class InteracaoService {
   let faturaAberta = null;
 
   if (servico.tipo === "SERVICO_24h" || servico.tipo === "SERVICO_30_DIAS") {
-    // Criar uma nova fatura SEMPRE para SERVICO_24h e SERVICO_30_DIAS
-    const dataVencimento = this.calcularVencimento(servico.tipo);
-    faturaAberta = await prisma.fatura.create({
-      data: {
-        numero: `FAT-${Date.now()}`,
-        usuarioId: servico.usuarioId,
-        data_vencimento: dataVencimento,
-        servicos: { connect: { id: servicoId } },
-      },
-    });
+    let dataVencimento: Date;
+
+  // Para SERVICO_24h, somar 24 horas à data atual
+  if (servico.tipo === "SERVICO_24h") {
+    dataVencimento = new Date();
+    dataVencimento.setHours(dataVencimento.getHours() + 24);  // Adiciona 24 horas
+  }
+
+  // Para SERVICO_30_DIAS, somar 3 dias à data atual
+  if (servico.tipo === "SERVICO_30_DIAS") {
+    dataVencimento = new Date();
+    dataVencimento.setDate(dataVencimento.getDate() + 3);  // Adiciona 3 dias
+  }
+
+  faturaAberta = await prisma.fatura.create({
+    data: {
+      numero: `FAT-${Date.now()}`,
+      usuarioId: servico.usuarioId,
+      data_vencimento: dataVencimento,
+      servicos: { connect: { id: servicoId } },
+    },
+  });
   } else {
     // Para os outros tipos de serviço, verificar se existe fatura aberta
     faturaAberta = await prisma.fatura.findFirst({
