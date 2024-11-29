@@ -36,7 +36,7 @@ export class InteracaoService {
   if (!usuario) throw new Error("Usuário relacionado ao serviço não encontrado.");
 
   const mensagem = `Prezado(a) ${usuario.name}, a sua solicitação foi aceite. Abra o App para mais detalhes. Obrigado!`;
-  try {
+ /* try {
     const smsSent = await sendSmsToAdminFactu({
       message: mensagem,
       userPhone: usuario.telefone,
@@ -48,12 +48,16 @@ export class InteracaoService {
   } catch (error) {
     console.error(`Erro ao enviar SMS para o usuário ${usuario.name}:`, error);
   }
-
+*/
   // Lógica para criação de fatura
   let faturaAberta = null;
 
   if (servico.tipo === "SERVICO_24h" || servico.tipo === "SERVICO_30_DIAS") {
     let dataVencimento: Date;
+    // Obter ano, mês e dia no formato YYYYMMDD
+    const dataPrefixo = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // Ex: 20241129
+    const numeroAleatorio = Math.floor(10 + Math.random() * 90); // Garante 2 dígitos aleatórios
+    const numeroFatura = `FAT-${dataPrefixo}${numeroAleatorio}`;
 
   // Para SERVICO_24h, somar 24 horas à data atual
   if (servico.tipo === "SERVICO_24h") {
@@ -69,7 +73,7 @@ export class InteracaoService {
 
   faturaAberta = await prisma.fatura.create({
     data: {
-      numero: `FAT-${Date.now()}`,
+      numero: numeroFatura,
       usuarioId: servico.usuarioId,
       data_vencimento: dataVencimento,
       servicos: { connect: { id: servicoId } },
@@ -86,10 +90,13 @@ export class InteracaoService {
 
     if (!faturaAberta) {
       // Criar nova fatura caso não exista nenhuma aberta
+      const dataPrefixo = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // Ex: 20241129
+      const numeroAleatorio = Math.floor(10 + Math.random() * 90); // Garante 2 dígitos aleatórios
+      const numeroFatura = `FAT-${dataPrefixo}${numeroAleatorio}`;
       const dataVencimento = this.calcularVencimento(usuario.tipo_pagamento);
       faturaAberta = await prisma.fatura.create({
         data: {
-          numero: `FAT-${Date.now()}`,
+          numero: numeroFatura,
           usuarioId: servico.usuarioId,
           data_vencimento: dataVencimento,
           servicos: { connect: { id: servicoId } },
