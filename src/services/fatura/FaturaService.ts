@@ -17,7 +17,8 @@ export class FaturaService {
         usuario: {
           select: {
             name: true,
-            proces_number:true,
+            proces_number: true,
+            tipo_pagamento:true
           }
         }
       },
@@ -40,7 +41,8 @@ export class FaturaService {
         usuario: {
           select: {
             name: true,
-            proces_number:true
+            proces_number: true,
+            tipo_pagamento:true
           }
         }
       },
