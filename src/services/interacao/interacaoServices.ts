@@ -12,8 +12,7 @@ interface InteracaoData {
 }
 
 export class InteracaoService {
-  // Método para criar uma interação
-  async create({ conteudo, autorId, servicoId, tipo }: InteracaoData) {
+ async create({ conteudo, autorId, servicoId, tipo }: InteracaoData) {
   // Verificar se o serviço já possui interações
   const servico = await prisma.servico.findUnique({
     where: { id: servicoId },
@@ -36,63 +35,40 @@ export class InteracaoService {
   if (!usuario) throw new Error("Usuário relacionado ao serviço não encontrado.");
 
   const mensagem = `Prezado(a) ${usuario.name}, a sua solicitação foi aceite. Abra o App para mais detalhes. Obrigado!`;
- /* try {
-    const smsSent = await sendSmsToAdminFactu({
-      message: mensagem,
-      userPhone: usuario.telefone,
-    });
 
-    if (!smsSent) {
-      console.log(`Falha ao enviar SMS para o usuário ${usuario.name}.`);
-    }
-  } catch (error) {
-    console.error(`Erro ao enviar SMS para o usuário ${usuario.name}:`, error);
-  }
-*/
   // Lógica para criação de fatura
   let faturaAberta = null;
 
   if (servico.tipo === "SERVICO_24h" || servico.tipo === "SERVICO_30_DIAS") {
-    let dataVencimento: Date;
-    // Obter ano, mês e dia no formato YYYYMMDD
-    const dataPrefixo = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // Ex: 20241129
-    const numeroAleatorio = Math.floor(10 + Math.random() * 90); // Garante 2 dígitos aleatórios
-    const numeroFatura = `FAT-${dataPrefixo}${numeroAleatorio}`;
-
-  // Para SERVICO_24h, somar 24 horas à data atual
-  if (servico.tipo === "SERVICO_24h") {
-    dataVencimento = new Date();
-    dataVencimento.setHours(dataVencimento.getHours() + 24);  // Adiciona 24 horas
-  }
-
-  // Para SERVICO_30_DIAS, somar 3 dias à data atual
-  if (servico.tipo === "SERVICO_30_DIAS") {
-    dataVencimento = new Date();
-    dataVencimento.setDate(dataVencimento.getDate() + 3);  // Adiciona 3 dias
-  }
-
-  faturaAberta = await prisma.fatura.create({
-    data: {
-      numero: numeroFatura,
-      usuarioId: servico.usuarioId,
-      data_vencimento: dataVencimento,
-      servicos: { connect: { id: servicoId } },
-    },
-  });
+    // Sempre criar uma nova fatura para esses tipos de serviço
+    const numeroFatura = this.gerarNumeroFatura();
+    const dataVencimento = this.calcularVencimentoPorTipo(servico.tipo);
+    
+    faturaAberta = await prisma.fatura.create({
+      data: {
+        numero: numeroFatura,
+        usuarioId: servico.usuarioId,
+        data_vencimento: dataVencimento,
+        servicos: { connect: { id: servicoId } },
+      },
+    });
   } else {
-    // Para os outros tipos de serviço, verificar se existe fatura aberta
+    // Para outros serviços, verificar se existe fatura aberta
     faturaAberta = await prisma.fatura.findFirst({
       where: {
         usuarioId: servico.usuarioId,
         status: "ABERTA",
+        servicos: {
+          none: {
+            tipo: { in: ["SERVICO_24h", "SERVICO_30_DIAS"] },
+          },
+        },
       },
     });
 
     if (!faturaAberta) {
-      // Criar nova fatura caso não exista nenhuma aberta
-      const dataPrefixo = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // Ex: 20241129
-      const numeroAleatorio = Math.floor(10 + Math.random() * 90); // Garante 2 dígitos aleatórios
-      const numeroFatura = `FAT-${dataPrefixo}${numeroAleatorio}`;
+      // Criar nova fatura caso não exista nenhuma aberta ou se a aberta for do tipo 24h ou 30 dias
+      const numeroFatura = this.gerarNumeroFatura();
       const dataVencimento = this.calcularVencimento(usuario.tipo_pagamento);
       faturaAberta = await prisma.fatura.create({
         data: {
@@ -116,6 +92,25 @@ export class InteracaoService {
     data: { conteudo, autorId, servicoId, tipo },
   });
 }
+
+// Gerar número de fatura (método auxiliar)
+private gerarNumeroFatura(): string {
+  const dataPrefixo = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // Ex: 20241129
+  const numeroAleatorio = Math.floor(10 + Math.random() * 90); // Garante 2 dígitos aleatórios
+  return `FAT-${dataPrefixo}${numeroAleatorio}`;
+}
+
+// Calcular vencimento por tipo de serviço (método auxiliar)
+private calcularVencimentoPorTipo(tipo: string): Date {
+  const dataVencimento = new Date();
+  if (tipo === "SERVICO_24h") {
+    dataVencimento.setHours(dataVencimento.getHours() + 24);
+  } else if (tipo === "SERVICO_30_DIAS") {
+    dataVencimento.setDate(dataVencimento.getDate() + 3);
+  }
+  return dataVencimento;
+}
+
 
 
   // Método para listar interações de um serviço
