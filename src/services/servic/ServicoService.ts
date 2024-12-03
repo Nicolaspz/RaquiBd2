@@ -71,7 +71,13 @@ class ServicoService {
         status: true,
         usuarioId: true,
         tipo: true,
-        created_at:true,
+        created_at: true,
+        usuario: {
+          select: {
+            proces_number: true,
+            tipo_pagamento:true
+          }
+        },
         Interacao: {  // Certifique-se de que o nome da relação está correto
         select: {
         id: true,
@@ -83,7 +89,9 @@ class ServicoService {
           orderBy: {
       criado_em: 'desc',  // Ordena as interações pela data de criação, da mais recente para a mais antiga
     },
-    },
+        },
+      
+      
       },
     });
     return  servicos ; // Retorna os serviços diretamente
