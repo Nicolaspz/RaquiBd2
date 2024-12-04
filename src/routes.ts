@@ -39,6 +39,8 @@ router.get('/pedidos/completed', isAuthenticated, pedidoController.listCompleted
 router.put('/pedido',isAuthenticated,pedidoController.updateStatus)
 router.post('/pedido', isAuthenticated, pedidoController.create)
 router.get('/pedido_user/:IdUser', isAuthenticated, pedidoController.listByIdUSer)
+router.delete('/pedido_user/:IdFatura', isAuthenticated, pedidoController.deletar)
+
 
 
 
@@ -53,7 +55,7 @@ router.delete("/interacoes/:id",isAuthenticated, interacaoController.delete);
 router.get("/fatura",isAuthenticated, faturaController.listar); // Listar faturas
 router.get("/fatura/:IdUser",isAuthenticated, faturaController.listarById); // Listar faturas
 router.delete("/fatura/:id",isAuthenticated, faturaController.eliminar); // Eliminar fatura
-router.patch("/fatura/:id",isAuthenticated, faturaController.fechar); // Fechar fatura aqui 
+router.put("/fatura/:id",isAuthenticated, faturaController.fechar); // Fechar fatura aqui 
 router.get("/verificar", faturaController.executarVerificacao); 
 
 

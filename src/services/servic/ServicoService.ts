@@ -185,6 +185,9 @@ class ServicoService {
     });
     return servicos;
   }
+  async delete(id: string) {
+    await prismaClient.servico.delete({ where: { id } });
+  }
 }
 
 export { ServicoService };
