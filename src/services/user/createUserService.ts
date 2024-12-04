@@ -5,7 +5,7 @@ import { sendSmsToAdmin } from '../../utils/smsService'
 
 interface UserRequest {
   name: string;
-  email: string;
+  email?: string;
   tipo_pagamento: 'CONTA_3DIAS'| 'CONTA_30DIAS' | 'CONTA_7DIAS' | 'CONTA_15DIAS';
   telefone: string;
   role: 'ADMIN' | 'CLIENT';
@@ -29,9 +29,9 @@ function generateRandomPassword(length = 10) {
 class CreateUserService {
   async execute({ name, email, role, tipo_pagamento, telefone,nif,morada,user_name,redes }: UserRequest) {
   // Verifique se enviou email
-  if (!email) {
+  /*if (!email) {
     throw new Error("Email incorreto");
-  }
+  }*/
 
   // Verifique se enviou telefone
   if (!telefone) {
@@ -41,12 +41,18 @@ class CreateUserService {
     throw new Error("Username incorreto");
   }
 
-  // Verificar se o email já está cadastrado na plataforma
-  const userAlreadyExistsEmail = await prismaClient.user.findFirst({
-    where: {
-      email: email,
-    },
-  });
+  // Verificar se o email foi fornecido e já está cadastrado
+  if (email) {
+    const userAlreadyExistsEmail = await prismaClient.user.findFirst({
+      where: {
+        email: email,
+      },
+    });
+
+    if (userAlreadyExistsEmail) {
+      throw new Error("O email já existe");
+    }
+  }
 
   // Verificar se o telefone já está cadastrado na plataforma
   const userAlreadyExistsPhone = await prismaClient.user.findFirst({
@@ -64,9 +70,7 @@ class CreateUserService {
     throw new Error("O Usuario já existe");
   }
 
-  if (userAlreadyExistsEmail) {
-    throw new Error("O email já existe");
-  }
+  
 
   if (userAlreadyExistsPhone) {
     throw new Error("O telefone já existe");
@@ -80,7 +84,7 @@ class CreateUserService {
   // Gerar uma senha aleatória
   const generatedPassword = generateRandomPassword();
   const passwordHashed = await hash(generatedPassword, 8);
-  console.log("a senha é " +generatedPassword)
+  //console.log("a senha é " +generatedPassword)
     // Criar o user
     
     const smsSent = await sendSmsToAdmin({
@@ -99,7 +103,7 @@ class CreateUserService {
     data: {
       name: name,
       proces_number:newNumber,
-      email: email,
+      email: email || null,
       password: passwordHashed,
       role: role,
       tipo_pagamento, 
