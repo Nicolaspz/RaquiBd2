@@ -107,7 +107,7 @@ class CreateUserService {
       tipo_pagamento,
       telefone: telefone,
       nif: nif,
-      morada: morada,
+      morada: morada || null,
       user_name: user_name,
       redes,
       autoPass: generatedPassword,

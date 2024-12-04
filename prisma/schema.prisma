@@ -53,6 +53,7 @@ enum StatusFatura {
   ABERTA
   PAGA
   CANCELADA
+  FECHADA
 }
 
 model User {

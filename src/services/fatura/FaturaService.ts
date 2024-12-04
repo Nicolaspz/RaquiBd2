@@ -57,10 +57,19 @@ export class FaturaService {
   }
 
   // Fechar fatura pelo ID
-  async fecharFatura(faturaId: string) {
+  async PagarFatura(faturaId: string) {
     return await prisma.fatura.update({
       where: { id: faturaId },
       data: { status: "PAGA" },
+    });
+  }
+
+  async FecharFatura(faturaId: string) {
+    return await prisma.fatura.update({
+      where: { id: faturaId },
+      data: {
+        status: "FECHADA"
+      },
     });
   }
 

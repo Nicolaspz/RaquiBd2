@@ -44,7 +44,20 @@ const faturaService = new FaturaService();
     const { id } = req.params;
 
     try {
-      await faturaService.fecharFatura(id);
+      await faturaService.FecharFatura(id);
+      return res.status(200).json({ message: "Fatura fechada com sucesso" });
+    } catch (error) {
+      console.error("Erro ao fechar fatura:", error);
+      return res.status(500).json({ message: "Erro ao fechar fatura" });
+    }
+   }
+   
+   
+   async Pagar(req: Request, res: Response) {
+    const { id } = req.params;
+
+    try {
+      await faturaService.PagarFatura(id);
       return res.status(200).json({ message: "Fatura fechada com sucesso" });
     } catch (error) {
       console.error("Erro ao fechar fatura:", error);
