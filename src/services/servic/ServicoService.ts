@@ -87,7 +87,7 @@ class ServicoService {
         criado_em: true,
           },
           orderBy: {
-      criado_em: 'desc',  // Ordena as interações pela data de criação, da mais recente para a mais antiga
+      criado_em: 'asc',  // Ordena as interações pela data de criação, da mais recente para a mais antiga
     },
         },
       
