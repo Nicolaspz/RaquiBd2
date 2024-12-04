@@ -53,7 +53,7 @@ router.delete("/interacoes/:id",isAuthenticated, interacaoController.delete);
 router.get("/fatura",isAuthenticated, faturaController.listar); // Listar faturas
 router.get("/fatura/:IdUser",isAuthenticated, faturaController.listarById); // Listar faturas
 router.delete("/fatura/:id",isAuthenticated, faturaController.eliminar); // Eliminar fatura
-router.patch("/fatura/:id",isAuthenticated, faturaController.fechar); // Fechar fatura
+router.patch("/fatura/:id",isAuthenticated, faturaController.fechar); // Fechar fatura aqui 
 router.get("/verificar", faturaController.executarVerificacao); 
 
 
