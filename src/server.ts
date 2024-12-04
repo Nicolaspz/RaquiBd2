@@ -10,18 +10,24 @@ import { Server } from "socket.io"; // Socket.IO
 dotenv.config();
 
 const app = express();
-
+const corsOptions = {
+  origin: ["http://localhost:8081", "https://raqui.vercel.app"], // Lista de origens permitidas
+  methods: ["GET", "POST", "PUT", "DELETE"], // Métodos permitidos
+  allowedHeaders: ["Content-Type", "Authorization"], // Cabeçalhos permitidos
+  credentials: true, // Permite envio de cookies e cabeçalhos de autenticação
+};
 // Cria o servidor HTTP
 const server = http.createServer(app);
 
 
 
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(router);
 
 // Middleware de tratamento de erros
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  
   if (err instanceof Error) {
     return res.status(400).json({
       error: err.message,
