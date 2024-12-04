@@ -92,9 +92,9 @@ class CreateUserService {
       info:"Novo Cliente Criado"
     });
 
-    if (!smsSent) {
+    /*if (!smsSent) {
       throw new Error('Erro ao enviar SMS para a administração. Usuário não criado.');
-    }
+    }*/
   const user = await prismaClient.user.create({
     data: {
       name: name,
