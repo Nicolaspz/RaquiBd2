@@ -27,18 +27,35 @@ function generateRandomPassword(length = 10) {
 }
 
 class CreateUserService {
-  async execute({ name, email, role, tipo_pagamento, telefone,nif,morada,user_name,redes }: UserRequest) {
-  // Verifique se enviou email
-  /*if (!email) {
-    throw new Error("Email incorreto");
-  }*/
-
-  // Verifique se enviou telefone
+ async execute({ name, email, role, tipo_pagamento, telefone, nif, morada, user_name, redes }: UserRequest) {
+  // Verificar se enviou telefone
   if (!telefone) {
     throw new Error("Telefone incorreto");
   }
+
   if (!user_name) {
     throw new Error("Username incorreto");
+  }
+
+  // Verificar se o telefone já está cadastrado na plataforma
+  const userAlreadyExistsPhone = await prismaClient.user.findFirst({
+    where: {
+      telefone: telefone,
+    },
+  });
+
+  const userAlreadyExistsUserName = await prismaClient.user.findFirst({
+    where: {
+      user_name: user_name,
+    },
+  });
+
+  if (userAlreadyExistsUserName) {
+    throw new Error("O Usuário já existe");
+  }
+
+  if (userAlreadyExistsPhone) {
+    throw new Error("O telefone já existe");
   }
 
   // Verificar se o email foi fornecido e já está cadastrado
@@ -54,65 +71,46 @@ class CreateUserService {
     }
   }
 
-  // Verificar se o telefone já está cadastrado na plataforma
-  const userAlreadyExistsPhone = await prismaClient.user.findFirst({
-    where: {
-      telefone: telefone,
-    },
+  // Gerar um número de processo
+  const lastUser = await prismaClient.user.findFirst({
+    orderBy: { proces_number: 'desc' },
   });
-  const userAlreadyExistsUserName = await prismaClient.user.findFirst({
-    where: {
-      user_name: user_name,
-    },
-  });
+  const lastNumber = lastUser ? parseInt(lastUser.proces_number) : 0;
+  const newNumber = (lastNumber + 1).toString().padStart(2, '0');
 
-  if (userAlreadyExistsUserName) {
-    throw new Error("O Usuario já existe");
-  }
-
-  
-
-  if (userAlreadyExistsPhone) {
-    throw new Error("O telefone já existe");
-  }
-    //gerar procees_number
-     const lastUser = await prismaClient.user.findFirst({
-     orderBy: { proces_number: 'desc' }
-     });
-    const lastNumber = lastUser ? parseInt(lastUser.proces_number) : 0;
-    const newNumber = (lastNumber + 1).toString().padStart(2, '0'); 
   // Gerar uma senha aleatória
   const generatedPassword = generateRandomPassword();
   const passwordHashed = await hash(generatedPassword, 8);
-  //console.log("a senha é " +generatedPassword)
-    // Criar o user
-    
-    const smsSent = await sendSmsToAdmin({
-      name,
-      userPhone: telefone,
-      proces_number: newNumber,
-      fatura:tipo_pagamento,
-      userPassword: generatedPassword,
-      info:"Novo Cliente Criado"
-    });
+  console.log("A senha é " + generatedPassword);
 
-    /*if (!smsSent) {
+   // Enviar SMS para a administração
+   /*if (!smsSent) {
       throw new Error('Erro ao enviar SMS para a administração. Usuário não criado.');
     }*/
+  const smsSent = await sendSmsToAdmin({
+    name,
+    userPhone: telefone,
+    proces_number: newNumber,
+    fatura: tipo_pagamento,
+    userPassword: generatedPassword,
+    info: "Novo Cliente Criado",
+  });
+
+  // Criar o usuário
   const user = await prismaClient.user.create({
     data: {
       name: name,
-      proces_number:newNumber,
-      email: email || null,
+      proces_number: newNumber,
+      email: email || null, // Permitir que o email seja nulo
       password: passwordHashed,
       role: role,
-      tipo_pagamento, 
+      tipo_pagamento,
       telefone: telefone,
-      nif:nif,
-      morada:morada,
+      nif: nif,
+      morada: morada,
       user_name: user_name,
       redes,
-      autoPass:generatedPassword
+      autoPass: generatedPassword,
     },
     select: {
       id: true,
@@ -120,18 +118,17 @@ class CreateUserService {
       email: true,
       role: true,
       tipo_pagamento: true,
-      nif:true,
-      user_name:true,
+      nif: true,
+      user_name: true,
       morada: true,
       proces_number: true,
-      redes:true
+      redes: true,
     },
   });
 
-  // chamar aqui
-
   return { user };
 }
+
 }
 
 export { CreateUserService };
