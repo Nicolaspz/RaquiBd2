@@ -84,9 +84,7 @@ class CreateUserService {
   console.log("A senha é " + generatedPassword);
 
    // Enviar SMS para a administração
-   /*if (!smsSent) {
-      throw new Error('Erro ao enviar SMS para a administração. Usuário não criado.');
-    }*/
+   
   const smsSent = await sendSmsToAdmin({
     name,
     userPhone: telefone,
@@ -95,6 +93,10 @@ class CreateUserService {
     userPassword: generatedPassword,
     info: "Novo Cliente Criado",
   });
+   
+   if (!smsSent) {
+      throw new Error('Erro ao enviar SMS para a administração. Usuário não criado.');
+    }
 
   // Criar o usuário
   const user = await prismaClient.user.create({
