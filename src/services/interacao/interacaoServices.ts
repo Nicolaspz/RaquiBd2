@@ -34,7 +34,21 @@ export class InteracaoService {
   });
   if (!usuario) throw new Error("Usuário relacionado ao serviço não encontrado.");
 
-  const mensagem = `Prezado(a) ${usuario.name}, a sua solicitação foi aceite. Abra o App para mais detalhes. Obrigado!`;
+   const mensagem = `Prezado(a) ${usuario.name}, a sua solicitação foi aceite. Abra o App para mais detalhes. Obrigado!`;
+   try {
+      const smsSent = await sendSmsToAdminFactu({
+        message: mensagem,
+        userPhone: usuario.telefone,
+      });
+
+      if (!smsSent) {
+        console.log("Erro")
+      }
+
+      
+    } catch (error) {
+     
+    }
 
   // Lógica para criação de fatura
   let faturaAberta = null;

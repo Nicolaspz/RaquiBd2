@@ -142,12 +142,12 @@ async function sendSmsToAdminFactu({message, userPhone }) {
 
         if (authResponse.data.status === 200) {
           token = authResponse.data.data.authToken;
-          console.log("Aki mesmo ",authResponse.data.data.authToken)
+          //console.log("Aki mesmo ",authResponse.data.data.authToken)
         } else {
           throw new Error('Falha ao autenticar com a API de SMS');
         }
       } catch (error) {
-        console.error('Erro ao autenticar com a API de SMS:', error.message);
+        //console.error('Erro ao autenticar com a API de SMS:', error.message);
         return false; // Retorna false em caso de erro de autenticação
       }
 
