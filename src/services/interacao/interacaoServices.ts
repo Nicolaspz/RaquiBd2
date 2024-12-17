@@ -111,7 +111,7 @@ export class InteracaoService {
 private gerarNumeroFatura(): string {
   const dataPrefixo = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // Ex: 20241129
   const numeroAleatorio = Math.floor(10 + Math.random() * 90); // Garante 2 dígitos aleatórios
-  return `FAT-${dataPrefixo}${numeroAleatorio}`;
+  return `FO-${dataPrefixo}${numeroAleatorio}`;
 }
 
 // Calcular vencimento por tipo de serviço (método auxiliar)
