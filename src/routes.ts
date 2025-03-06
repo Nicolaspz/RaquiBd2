@@ -27,7 +27,7 @@ router.get('/all_users',isAuthenticated, userController.listAllUsers)
 router.get('/user',isAuthenticated, userController.UserById)
 router.put('/user',isAuthenticated, userController.updateUser)
 router.delete('/user',isAuthenticated, userController.deleteUser)
-
+router.put('/change-password',isAuthenticated, createUserController.updatePassword)
 
 router.post('/session', Authcontroller.handle)
 router.get('/me', isAuthenticated,DetailController.handle)

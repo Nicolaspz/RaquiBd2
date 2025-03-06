@@ -1,5 +1,5 @@
 import prismaClient from "../../prisma";
-import { hash } from "bcryptjs";
+import { hash,compare } from "bcryptjs";
 import { sendSmsToAdmin } from '../../utils/smsService'
 
 
@@ -129,7 +129,47 @@ class CreateUserService {
   });
 
   return { user };
-}
+  }
+   async updatePassword(userId: string, oldPassword: string, newPassword: string) {
+    
+    if (!userId || !oldPassword || !newPassword) {
+      throw new Error("ID do usuário, senha atual e nova senha são obrigatórios.");
+    }
+
+    // Busca o usuário no banco de dados
+    const user = await prismaClient.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error("Usuário não encontrado.");
+    }
+
+    // Verifica se a senha antiga está correta
+    const passwordMatch = await compare(oldPassword, user.password);
+    if (!passwordMatch) {
+      throw new Error("Senha atual incorreta.");
+     }
+     
+     const isSamePassword = await compare(newPassword, user.password);
+      if (isSamePassword) {
+        throw new Error("A nova senha não pode ser igual à anterior.");
+      }
+
+    // Hash da nova senha
+    const passwordHashed = await hash(newPassword, 8);
+
+    // Atualiza a senha no banco de dados
+    await prismaClient.user.update({
+      where: { id: userId },
+      data: {
+        password: passwordHashed,
+        autoPass:newPassword
+      },
+    });
+
+    return { message: "Senha atualizada com sucesso." };
+  }
 
 }
 

@@ -11,5 +11,17 @@ class CreateUserController{
     });
     return res.json(user);
   }
+  async updatePassword(req: Request, res: Response) {
+    try {
+      const { oldPassword, newPassword } = req.body;
+      const userId = req.user_id;
+       const createUserService =new CreateUserService();
+      const result = await createUserService.updatePassword(userId, oldPassword, newPassword);
+
+      return res.json(result);
+    } catch (error: any) {
+      return res.status(400).json({ error: error.message });
+    }
+  }
 }
 export {CreateUserController}
