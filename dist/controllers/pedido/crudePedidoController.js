@@ -39,6 +39,19 @@ class crudePedidoController {
             }
         });
     }
+    deletar(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { IdFatura } = req.params;
+                const servicoService = new ServicoService_1.ServicoService();
+                const fatura = yield servicoService.delete(IdFatura);
+                return res.status(200).json(fatura);
+            }
+            catch (error) {
+                return res.status(500).json({ error: "Erro ao Eliminar Factura" });
+            }
+        });
+    }
     // Método para listar serviços pendentes
     listPending(req, res) {
         return __awaiter(this, void 0, void 0, function* () {

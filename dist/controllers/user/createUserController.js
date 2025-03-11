@@ -23,5 +23,19 @@ class CreateUserController {
             return res.json(user);
         });
     }
+    updatePassword(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { oldPassword, newPassword } = req.body;
+                const userId = req.user_id;
+                const createUserService = new createUserService_1.CreateUserService();
+                const result = yield createUserService.updatePassword(userId, oldPassword, newPassword);
+                return res.json(result);
+            }
+            catch (error) {
+                return res.status(400).json({ error: error.message });
+            }
+        });
+    }
 }
 exports.CreateUserController = CreateUserController;

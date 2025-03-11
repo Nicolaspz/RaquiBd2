@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ServicoService = void 0;
 const prisma_1 = __importDefault(require("../../prisma"));
+const smsService_1 = require("../../utils/smsService");
 class ServicoService {
     // Método para criar um novo serviço
     create(_a) {
@@ -34,7 +35,13 @@ class ServicoService {
                     created_at: true,
                 },
             });
-            console.log(servico);
+            //console.log(servico);
+            if (servico) {
+                const smsSent = yield (0, smsService_1.sendSmsPddo)();
+                if (!smsSent) {
+                    console.log("Falha ao enviar SMS.");
+                }
+            }
             return { servico }; // Retorna o serviço diretamente
         });
     }
@@ -49,6 +56,12 @@ class ServicoService {
                     usuarioId: true,
                     tipo: true,
                     created_at: true,
+                    usuario: {
+                        select: {
+                            proces_number: true,
+                            tipo_pagamento: true
+                        }
+                    },
                     Interacao: {
                         select: {
                             id: true,
@@ -58,7 +71,7 @@ class ServicoService {
                             criado_em: true,
                         },
                         orderBy: {
-                            criado_em: 'desc', // Ordena as interações pela data de criação, da mais recente para a mais antiga
+                            criado_em: 'asc', // Ordena as interações pela data de criação, da mais recente para a mais antiga
                         },
                     },
                 },
@@ -135,6 +148,12 @@ class ServicoService {
                     usuarioId: true,
                     tipo: true,
                     created_at: true,
+                    usuario: {
+                        select: {
+                            proces_number: true,
+                            tipo_pagamento: true
+                        }
+                    },
                     Interacao: {
                         select: {
                             id: true,
@@ -150,6 +169,11 @@ class ServicoService {
                 },
             });
             return servicos;
+        });
+    }
+    delete(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield prisma_1.default.servico.delete({ where: { id } });
         });
     }
 }

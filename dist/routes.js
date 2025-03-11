@@ -1,22 +1,18 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.router = void 0;
 const express_1 = require("express");
-const multer_1 = __importDefault(require("multer"));
 const createUserController_1 = require("./controllers/user/createUserController");
 const AuthUSerController_1 = require("./controllers/user/AuthUSerController");
 const DetailUserController_1 = require("./controllers/user/DetailUserController");
 const isAuthenticated_1 = require("./middlewares/isAuthenticated");
-const multer_2 = __importDefault(require("./config/multer"));
 const ListandUpadate_deleteUserController_1 = require("./controllers/user/ListandUpadate_deleteUserController");
 const crudePedidoController_1 = require("./controllers/pedido/crudePedidoController");
 const InteracaoController_1 = require("./controllers/Interacao/InteracaoController");
+const FaturaContoller_1 = require("./controllers/fatura/FaturaContoller");
 const router = (0, express_1.Router)();
 exports.router = router;
-const upload = (0, multer_1.default)(multer_2.default.upload("./tmp"));
+const faturaController = new FaturaContoller_1.FaturaController();
 const createUserController = new createUserController_1.CreateUserController();
 const userController = new ListandUpadate_deleteUserController_1.UserController();
 const Authcontroller = new AuthUSerController_1.AuthUserController();
@@ -30,6 +26,7 @@ router.get('/all_users', isAuthenticated_1.isAuthenticated, userController.listA
 router.get('/user', isAuthenticated_1.isAuthenticated, userController.UserById);
 router.put('/user', isAuthenticated_1.isAuthenticated, userController.updateUser);
 router.delete('/user', isAuthenticated_1.isAuthenticated, userController.deleteUser);
+router.put('/change-password', isAuthenticated_1.isAuthenticated, createUserController.updatePassword);
 router.post('/session', Authcontroller.handle);
 router.get('/me', isAuthenticated_1.isAuthenticated, DetailController.handle);
 // pedidos
@@ -39,11 +36,18 @@ router.get('/pedidos/completed', isAuthenticated_1.isAuthenticated, pedidoContro
 router.put('/pedido', isAuthenticated_1.isAuthenticated, pedidoController.updateStatus);
 router.post('/pedido', isAuthenticated_1.isAuthenticated, pedidoController.create);
 router.get('/pedido_user/:IdUser', isAuthenticated_1.isAuthenticated, pedidoController.listByIdUSer);
+router.delete('/pedido_user/:IdFatura', isAuthenticated_1.isAuthenticated, pedidoController.deletar);
 //Interacões
-router.post("/interacoes", interacaoController.create);
-router.get("/interacoes", interacaoController.listByServico);
-router.put("/interacoes/:id", interacaoController.update);
-router.delete("/interacoes/:id", interacaoController.delete);
+router.post("/interacoes", isAuthenticated_1.isAuthenticated, interacaoController.create);
+router.get("/interacoes", isAuthenticated_1.isAuthenticated, interacaoController.listByServico);
+router.put("/interacoes/:id", isAuthenticated_1.isAuthenticated, interacaoController.update);
+router.delete("/interacoes/:id", isAuthenticated_1.isAuthenticated, interacaoController.delete);
+//fatura
+router.get("/fatura", isAuthenticated_1.isAuthenticated, faturaController.listar); // Listar faturas
+router.get("/fatura/:IdUser", isAuthenticated_1.isAuthenticated, faturaController.listarById); // Listar faturas
+router.delete("/fatura/:id", isAuthenticated_1.isAuthenticated, faturaController.eliminar); // Eliminar fatura
+router.put("/fatura/:id", isAuthenticated_1.isAuthenticated, faturaController.fechar); // Fechar fatura aqui 
+router.get("/verificar", faturaController.executarVerificacao);
 router.get('/ping', (req, res) => {
     res.send('Server is running ++');
 });

@@ -24,10 +24,23 @@ class InteracaoController {
                     servicoId,
                     tipo,
                 });
-                return res.json(interacao);
+                // Verificar se a interação foi criada com sucesso
+                if (interacao) {
+                    // Se a fatura foi criada ou vinculada com sucesso
+                    return res.status(201).json({
+                        message: "Interação criada com sucesso.",
+                        interacao,
+                    });
+                }
+                return res.status(400).json({
+                    message: "Erro ao criar interação. Fatura não associada corretamente.",
+                });
             }
             catch (error) {
-                return res.status(500).json({ error: "Erro ao criar interação" });
+                return res.status(500).json({
+                    error: "Erro ao criar interação",
+                    message: error.message || "Ocorreu um erro desconhecido",
+                });
             }
         });
     }
