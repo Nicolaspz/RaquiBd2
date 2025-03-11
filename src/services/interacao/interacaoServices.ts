@@ -155,6 +155,7 @@ private calcularVencimentoPorTipo(tipo: string): Date {
       CONTA_7DIAS: 7,
       CONTA_15DIAS: 15,
       CONTA_30DIAS: 30,
+      CONTA_24H: 1,
     };
     return moment().add(dias[tipoPagamento] || 7, "days").toDate();
   }

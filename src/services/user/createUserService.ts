@@ -6,7 +6,7 @@ import { sendSmsToAdmin } from '../../utils/smsService'
 interface UserRequest {
   name: string;
   email?: string;
-  tipo_pagamento: 'CONTA_3DIAS'| 'CONTA_30DIAS' | 'CONTA_7DIAS' | 'CONTA_15DIAS';
+  tipo_pagamento: 'CONTA_3DIAS'| 'CONTA_30DIAS' | 'CONTA_7DIAS' | 'CONTA_15DIAS' | 'CONTA_24H';
   telefone: string;
   role: 'ADMIN' | 'CLIENT';
   nif: string;
