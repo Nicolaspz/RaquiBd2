@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { saveToken, getTokenByUserId } from '../services/notificationService';
-import fetch from 'node-fetch';
+//import fetch from 'node-fetch';
 
 // 1️⃣ Salvar o token no banco
 export const storeToken = async (req: Request, res: Response) => {
