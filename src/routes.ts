@@ -8,6 +8,7 @@ import { UserController } from "./controllers/user/ListandUpadate_deleteUserCont
 import { crudePedidoController } from "./controllers/pedido/crudePedidoController";
 import { InteracaoController } from "./controllers/Interacao/InteracaoController";
 import { FaturaController} from "./controllers/fatura/FaturaContoller";
+import { storeToken, sendNotification } from './controllers/notificationController'
 
 const router=Router();
 
@@ -57,6 +58,10 @@ router.get("/fatura/:IdUser",isAuthenticated, faturaController.listarById); // L
 router.delete("/fatura/:id",isAuthenticated, faturaController.eliminar); // Eliminar fatura
 router.put("/fatura/:id",isAuthenticated, faturaController.fechar); // Fechar fatura aqui 
 router.get("/verificar", faturaController.executarVerificacao); 
+
+//TokenNotifications
+router.post('/save-token', isAuthenticated,storeToken);  // Salvar token do usuário
+router.post('/send-notification',isAuthenticated, sendNotification);  // Enviar notificação
 
 
 router.get('/ping', (req, res) => {
