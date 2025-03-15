@@ -22,10 +22,16 @@ export const sendNotification = async (req: Request, res: Response) => {
   const { userId, title, message } = req.body;
 
   try {
+    console.log('📢 Iniciando envio de notificação...');
+    console.log('🔍 Buscando token para userId:', userId);
+
     const userToken = await getTokenByUserId(userId);
     if (!userToken) {
+      console.error('❌ Token não encontrado para o usuário:', userId);
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
+
+    console.log('✅ Token encontrado:', userToken.expoToken);
 
     const notification = {
       to: userToken.expoToken,
@@ -34,7 +40,8 @@ export const sendNotification = async (req: Request, res: Response) => {
       body: message,
     };
 
-    await fetch('https://exp.host/--/api/v2/push/send', {
+    console.log('📨 Enviando notificação para Expo...');
+    const response = await fetch('https://exp.host/--/api/v2/push/send', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -43,8 +50,18 @@ export const sendNotification = async (req: Request, res: Response) => {
       body: JSON.stringify(notification),
     });
 
+    const responseData = await response.json();
+    console.log('📩 Resposta da API Expo:', responseData);
+
+    if (!response.ok) {
+      console.error('🚨 Erro ao enviar notificação:', responseData);
+      return res.status(500).json({ error: 'Erro ao enviar notificação', details: responseData });
+    }
+
     res.json({ message: 'Notificação enviada!' });
   } catch (error) {
-    res.status(500).json({ error: 'Erro ao enviar notificação' });
+    console.error('💥 Erro no servidor:', error);
+    res.status(500).json({ error: 'Erro ao enviar notificação', details: error.message });
   }
 };
+
