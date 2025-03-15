@@ -61,7 +61,7 @@ router.get("/verificar", faturaController.executarVerificacao);
 
 //TokenNotifications
 router.post('/save-token',storeToken);  // Salvar token do usuário
-router.post('/send-notification',isAuthenticated, sendNotification);  // Enviar notificação
+router.post('/send-notification',sendNotification);  // Enviar notificação
 
 
 router.get('/ping', (req, res) => {
