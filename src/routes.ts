@@ -60,7 +60,7 @@ router.put("/fatura/:id",isAuthenticated, faturaController.fechar); // Fechar fa
 router.get("/verificar", faturaController.executarVerificacao); 
 
 //TokenNotifications
-router.post('/save-token', isAuthenticated,storeToken);  // Salvar token do usuário
+router.post('/save-token',storeToken);  // Salvar token do usuário
 router.post('/send-notification',isAuthenticated, sendNotification);  // Enviar notificação
 
 

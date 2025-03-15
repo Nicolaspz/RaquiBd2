@@ -16,7 +16,10 @@ export class InteracaoService {
   // Verificar se o serviço já possui interações
   const servico = await prisma.servico.findUnique({
     where: { id: servicoId },
-    include: { Interacao: true, Fatura: true },
+    include: {
+      Interacao: true,
+      Fatura: true
+    },
   });
 
   if (!servico) throw new Error("Serviço não encontrado.");
