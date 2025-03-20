@@ -37,7 +37,8 @@ export class InteracaoService {
   });
   if (!usuario) throw new Error("Usuário relacionado ao serviço não encontrado.");
 
-   const mensagem = `Prezado(a) ${usuario.name}, a sua solicitação foi aceite. Abra o App para mais detalhes. Obrigado!`;
+   const mensagem = `Prezado(a) ${usuario.name}, o seu pedido foi aceite, consulte a App.
+Obrigado Pela Prefrência !!`;
    try {
       const smsSent = await sendSmsToAdminFactu({
         message: mensagem,
