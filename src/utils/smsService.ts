@@ -66,9 +66,9 @@ ${userPassword}
   }
 }
 
-async function sendSmsPddo() {
+async function sendSmsPddo(userPhone) {
   const adminPhone = process.env.ADMIN_PHONE;
-  const message = `novo peidido de Serviço enviado, verifica a App`;
+  const message = `novo peidido recebido de ${userPhone}, verifica no App `;
 
   const smsApiUrl = process.env.SMS_API_URL;
   const smsApiKey = process.env.SMS_HUB_API_KEY;

@@ -5,7 +5,8 @@ interface CreateServicoRequest {
   descricao?: string; // Alterado para opcional, conforme o modelo
   status?: 'PENDENTE' | 'CONCLUIDO'; // Alinhado com o enum do Prisma
   usuarioId: string; // ID do usuário que cria o serviço
-  tipo: 'SERVICO_ENTREGA' | 'SERVICO_PESSOAL' |'SERVICO_24h' | 'SERVICO_30_DIAS';
+  tipo: 'SERVICO_ENTREGA' | 'SERVICO_PESSOAL' | 'SERVICO_24h' | 'SERVICO_30_DIAS';
+  
 }
 /*
 SERVICO_ENTREGA
@@ -18,12 +19,13 @@ interface UpdateServicoRequest {
   status?: 'PENDENTE' | 'CONCLUIDO'; // Alinhado com o enum do Prisma
 }
 
+
 interface ServicoResponse {
   id: string;
   descricao?: string; // Alterado para opcional, conforme o modelo
   status: 'PENDENTE' | 'CONCLUIDO'; // Alinhado com o enum do Prisma
   usuarioId: string; // ID do usuário associado
-
+  
 }
 
 class ServicoService {
@@ -43,7 +45,13 @@ class ServicoService {
         status: true,
         usuarioId: true,
         tipo: true,
-        created_at:true,
+        faturaId:true,
+        created_at: true,
+        usuario: {
+          select: {
+            telefone:true
+          }
+        }
         
       },
 
@@ -52,7 +60,7 @@ class ServicoService {
     //console.log(servico);
 
     if(servico){
-        const smsSent = await sendSmsPddo();
+        const smsSent = await sendSmsPddo(servico.usuario.telefone);
         if (!smsSent) {
           console.log("Falha ao enviar SMS.");
         }
@@ -74,6 +82,7 @@ class ServicoService {
         created_at: true,
         usuario: {
           select: {
+            telefone:true,
             proces_number: true,
             tipo_pagamento:true
           }
