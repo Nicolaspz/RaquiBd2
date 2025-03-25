@@ -19,7 +19,7 @@ class UserServices {
     return prisma.user.findMany();
   }
 
-  async updateUser({ userId, name, email, role, password, telefone, user_name }) {
+  async updateUser({ userId, name, email, role, password, telefone, user_name,tipo_pagamento }) {
     const dataToUpdate: any = {}; // Criamos um objeto vazio
 
     if (name !== undefined) dataToUpdate.name = name;
@@ -29,6 +29,7 @@ class UserServices {
     if (password !== undefined) dataToUpdate.autoPass = password;
     if (telefone !== undefined) dataToUpdate.telefone = telefone;
     if (user_name !== undefined) dataToUpdate.user_name = user_name;
+     if (tipo_pagamento !== undefined) dataToUpdate.tipo_pagamento = tipo_pagamento;
 
     return prisma.user.update({
         where: { id: userId },
