@@ -19,28 +19,23 @@ class UserServices {
     return prisma.user.findMany();
   }
 
-  async updateUser({ userId, name, email, role, password}) {
-    // Verifica se o usuário existe antes de atualizá-lo
-    const existingUser = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+  async updateUser({ userId, name, email, role, password, telefone, user_name }) {
+    const dataToUpdate: any = {}; // Criamos um objeto vazio
 
-    if (!existingUser) {
-      throw new Error("User not found");
-    }
-    
-    const passwordHas= await hash(password,8)
+    if (name !== undefined) dataToUpdate.name = name;
+    if (email !== undefined) dataToUpdate.email = email;
+    if (role !== undefined) dataToUpdate.role = role;
+    if (password !== undefined) dataToUpdate.password = await hash(password, 8);
+    if (password !== undefined) dataToUpdate.autoPass = password;
+    if (telefone !== undefined) dataToUpdate.telefone = telefone;
+    if (user_name !== undefined) dataToUpdate.user_name = user_name;
+
     return prisma.user.update({
-      where: { id: userId },
-      data: {
-        name,
-        email,
-        role,
-        password:passwordHas,
-       
-      },
+        where: { id: userId },
+        data: dataToUpdate, // Enviamos apenas os campos preenchidos
     });
-  }
+}
+
 
   async deleteUser(userId) {
     const existingUser = await prisma.user.findUnique({
