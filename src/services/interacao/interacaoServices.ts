@@ -40,8 +40,8 @@ export class InteracaoService {
       const isAdmin = interacao.autor.role === 'ADMIN';
       const destino = isAdmin ? usuario.telefone : "938654617";
       const mensagem = isAdmin 
-  ? `Atualização no pedido: ${interacao.conteudo}`
-  : `Novo comentário de ${interacao.autor.name}: ${interacao.conteudo}`;
+      ? `Atualização no pedido: ${interacao.conteudo}`
+      : `Novo comentário de ${interacao.autor.name}: ${interacao.conteudo}`;
       // Enviar notificação SMS para o usuário relacionado ao serviço
       
       if (!usuario) throw new Error("Usuário relacionado ao serviço não encontrado.");
@@ -112,10 +112,7 @@ export class InteracaoService {
       }
   }
 
-  // Criar a interação
-  return prisma.interacao.create({
-    data: { conteudo, autorId, servicoId, tipo },
-  });
+  
 }
 
 // Gerar número de fatura (método auxiliar)
