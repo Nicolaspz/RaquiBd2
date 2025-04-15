@@ -25,31 +25,24 @@ export class InteracaoService {
       if (!servico) throw new Error("Serviço não encontrado.");
 
       // Caso já tenha interações, apenas adicionar a interação
-      
-       const interacao = await prisma.interacao.create({
-         data: { conteudo, autorId, servicoId, tipo },
-          include: {
-            autor: true,
-            servico: { include: { usuario: true } }
-          }
-       });
-      const usuario = await prisma.user.findUnique({
-        where: { id: servico.usuarioId},
-      });
-      
-      const isAdmin = interacao.autor.role === 'ADMIN';
-      const destino = isAdmin ? usuario.telefone : "938654617";
-      const mensagem = isAdmin 
-  ? `Atualização no pedido: ${interacao.conteudo}`
-  : `Novo comentário de ${interacao.autor.name}: ${interacao.conteudo}`;
+      if (servico.Interacao.length > 0) {
+        return prisma.interacao.create({
+          data: { conteudo, autorId, servicoId, tipo },
+        });
+      }
+
       // Enviar notificação SMS para o usuário relacionado ao serviço
-      
+      const usuario = await prisma.user.findUnique({
+        where: { id: servico.usuarioId },
+      });
       if (!usuario) throw new Error("Usuário relacionado ao serviço não encontrado.");
 
+            const mensagem = `Prezado(a) ${usuario.name}, o seu pedido foi aceite, consulte a App.
+            Obrigado Pela Prefrência !!`;
       try {
           const smsSent = await sendSmsToAdminFactu({
             message: mensagem,
-            userPhone: destino,
+            userPhone: usuario.telefone,
           });
 
           if (!smsSent) {
