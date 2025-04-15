@@ -58,6 +58,22 @@ class UserController {
     await userService.deleteUser(userId);
     return res.json({ message: "User deleted successfully" });
   }
+
+  async updateStatus(req: Request, res: Response) {
+    const { userId } = req.body;
+
+    try {
+      if (!userId) {
+        return res.status(400).json({ error: "Dados inválidos" });
+      }
+      const userService = new UserServices();
+      const updatedUser = await userService.updateStatus(userId);
+
+      return res.status(200).json(updatedUser);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export { UserController };

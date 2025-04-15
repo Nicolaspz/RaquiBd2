@@ -2,10 +2,26 @@ import { PrismaClient } from "@prisma/client";
 import { hash } from "bcryptjs";
 const prisma = new PrismaClient();
 
-class UserServices {
- 
-  
 
+
+class UserServices {
+
+  async updateStatus(userId: string) {
+    try {
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: { 
+          status:false
+         },
+      });
+
+      return updatedUser;
+    } catch (error) {
+      throw new Error("Falha ao atualizar status do usuário");
+    }
+  }
+
+ 
   async UserById(id) {
     // Implementação da listagem de usuários de uma organização específica
     return prisma.user.findFirst({
@@ -16,7 +32,11 @@ class UserServices {
 
   async listAllUsers() {
     // Implementação da listagem de usuários de uma organização específica
-    return prisma.user.findMany();
+    return prisma.user.findMany({
+    where: {
+      status: true, // Filtra apenas usuários com status true
+    },
+  });
   }
 
   async updateUser({ userId, name, email, role, password, telefone, user_name,tipo_pagamento }) {

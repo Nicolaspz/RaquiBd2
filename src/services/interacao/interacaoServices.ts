@@ -25,11 +25,11 @@ export class InteracaoService {
   if (!servico) throw new Error("Serviço não encontrado.");
 
   // Caso já tenha interações, apenas adicionar a interação
-  if (servico.Interacao.length > 0) {
+  /*if (servico.Interacao.length > 0) {
     return prisma.interacao.create({
       data: { conteudo, autorId, servicoId, tipo },
     });
-  }
+  }*/
 
   // Enviar notificação SMS para o usuário relacionado ao serviço
   const usuario = await prisma.user.findUnique({
@@ -37,8 +37,8 @@ export class InteracaoService {
   });
   if (!usuario) throw new Error("Usuário relacionado ao serviço não encontrado.");
 
-   const mensagem = `Prezado(a) ${usuario.name}, o seu pedido foi aceite, consulte a App.
-Obrigado Pela Prefrência !!`;
+        const mensagem = `Prezado(a) ${usuario.name}, o seu pedido foi aceite, consulte a App.
+        Obrigado Pela Prefrência !!`;
    try {
       const smsSent = await sendSmsToAdminFactu({
         message: mensagem,
@@ -129,7 +129,7 @@ private calcularVencimentoPorTipo(tipo: string): Date {
   return dataVencimento;
 }
 
-
+  
 
   // Método para listar interações de um serviço
   async listByServico(servicoId: string) {

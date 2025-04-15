@@ -52,7 +52,19 @@ const faturaService = new FaturaService();
     }
    }
    
-   
+   //criar Fatura
+   /*async CriarFact(req: Request, res: Response) {
+    const {numero,usuarioId,data_vencimento,servicos} = req.params;
+
+    try {
+      await faturaService.createFatura(numero,usuarioId,data_vencimento,servicos);
+      return res.status(200).json({ message: "Fatura criada com sucesso" });
+    } catch (error) {
+      console.error("Erro ao fechar fatura:", error);
+      return res.status(500).json({ message: "Erro ao fechar fatura" });
+    }
+   }*/
+
    async Pagar(req: Request, res: Response) {
     const { id } = req.params;
 

@@ -56,6 +56,19 @@ export class FaturaService {
     });
   }
 
+  //create factura
+  /*async createFatura(numero:string,usuarioId:string,data_vencimento:string,servicos:string) {
+    await prisma.fatura.create({
+      data: {
+          numero: numero,
+          usuarioId: usuarioId,
+          data_vencimento: data_vencimento,
+          servicos: servicos,
+        },
+      
+    });
+   }*/
+
   // Fechar fatura pelo ID
   async PagarFatura(faturaId: string) {
     return await prisma.fatura.update({

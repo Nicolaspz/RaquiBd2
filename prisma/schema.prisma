@@ -66,6 +66,7 @@ model User {
   morada         String?
   role           Role
   redes          String
+  status         Boolean       @default(true)
   tipo_pagamento TipoPagamento
   telefone       String        @unique
   password       String

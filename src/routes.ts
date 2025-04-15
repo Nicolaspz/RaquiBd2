@@ -9,7 +9,7 @@ import { crudePedidoController } from "./controllers/pedido/crudePedidoControlle
 import { InteracaoController } from "./controllers/Interacao/InteracaoController";
 import { FaturaController} from "./controllers/fatura/FaturaContoller";
 import { storeToken, sendNotification } from './controllers/notificationController'
-
+import { criarFatura } from "./services/fatura/fatCreateServices";
 const router=Router();
 
 const faturaController = new FaturaController();
@@ -24,10 +24,10 @@ const interacaoController = new InteracaoController();
 //Routas USER
 router.post('/users',createUserController.hadle)
 //router.get('/users',isAuthenticated, userController.listUsers)
-router.get('/all_users',isAuthenticated, userController.listAllUsers)
+router.get('/all_users', isAuthenticated, userController.listAllUsers)
 router.get('/user',isAuthenticated, userController.UserById)
 router.put('/user',isAuthenticated, userController.updateUser)
-router.delete('/user',isAuthenticated, userController.deleteUser)
+router.put('/user/deactivate',isAuthenticated, userController.updateStatus)
 router.put('/change-password',isAuthenticated, createUserController.updatePassword)
 
 router.post('/session', Authcontroller.handle)
@@ -53,6 +53,7 @@ router.put("/interacoes/:id",isAuthenticated, interacaoController.update);
 router.delete("/interacoes/:id",isAuthenticated, interacaoController.delete);
 
 //fatura
+router.post("/fatura",criarFatura); // Listar faturas
 router.get("/fatura",isAuthenticated, faturaController.listar); // Listar faturas
 router.get("/fatura/:IdUser",isAuthenticated, faturaController.listarById); // Listar faturas
 router.delete("/fatura/:id",isAuthenticated, faturaController.eliminar); // Eliminar fatura
