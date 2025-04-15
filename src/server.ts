@@ -11,7 +11,7 @@ dotenv.config();
 
 const app = express();
 const corsOptions = {
-  origin: ["http://localhost:8081", "https://raqui.vercel.app", "http://localhost:3000"], // Lista de origens permitidas
+  origin: ["http://localhost:8081", "https://raqui.vercel.app", "http://localhost:3000","https://rdb-admin-web.vercel.app","https://rdb-admin-gcvconaon-nicolas-domingos-projects.vercel.app","https://rdb-admin-web-git-main-nicolas-domingos-projects.vercel.app"], // Lista de origens permitidas
   methods: ["GET", "POST", "PUT", "DELETE"], // Métodos permitidos
   allowedHeaders: ["Content-Type", "Authorization"], // Cabeçalhos permitidos
   credentials: true, // Permite envio de cookies e cabeçalhos de autenticação
