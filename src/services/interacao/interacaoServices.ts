@@ -40,7 +40,7 @@ export class InteracaoService {
       const isAdmin = interacao.autor.role === 'ADMIN';
       const destino = isAdmin ? usuario.telefone : "938654617";
       const mensagem = isAdmin 
-      ? `Atualização no pedido: ${interacao.conteudo}`
+      ? `Atualização do pedido: ${interacao.conteudo}`
       : `Novo comentário de ${interacao.autor.name}: ${interacao.conteudo}`;
       // Enviar notificação SMS para o usuário relacionado ao serviço
       
@@ -110,7 +110,8 @@ export class InteracaoService {
           data: { faturaId: faturaAberta.id },
         });
       }
-  }
+      }
+      return interacao;
 
   
 }
