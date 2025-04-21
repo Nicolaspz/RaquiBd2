@@ -40,18 +40,14 @@ router.get('/pedidos/completed', isAuthenticated, pedidoController.listCompleted
 router.put('/pedido',isAuthenticated,pedidoController.updateStatus)
 router.post('/pedido', isAuthenticated, pedidoController.create)
 router.get('/pedido_user/:IdUser', isAuthenticated, pedidoController.listByIdUSer)
+router.put('/pedido_arqhive/:id', isAuthenticated, pedidoController.ArquhivePedido)
+router.put('/pedido_rec/:id', isAuthenticated, pedidoController.RecPedido)
 router.delete('/pedido_user/:IdFatura', isAuthenticated, pedidoController.deletar)
-
-
-
-
-
 //Interacões
 router.post("/interacoes",isAuthenticated, interacaoController.create);
 router.get("/interacoes", isAuthenticated,interacaoController.listByServico);
 router.put("/interacoes/:id",isAuthenticated, interacaoController.update);
 router.delete("/interacoes/:id",isAuthenticated, interacaoController.delete);
-
 //fatura
 router.post("/fatura",criarFatura); // Listar faturas
 router.get("/fatura",isAuthenticated, faturaController.listar); // Listar faturas

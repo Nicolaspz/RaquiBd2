@@ -27,6 +27,8 @@ class AuthUserService {
     if (user.status === false) { // Ou !user.status
       throw new Error("Conta desativada. Entre em contato com o suporte.");
     }
+
+    
     const passwordMatch = await compare(password, user.password);
     // Se a senha for errada
     if (!passwordMatch) {

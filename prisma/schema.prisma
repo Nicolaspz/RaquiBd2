@@ -3,12 +3,18 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
+//datasource db {
+//provider = "postgresql"
+//url      = env("DATABASE_URL")
+//}
+
 model Servico {
   id               String        @id @default(uuid())
+  numero           Int           @default(0)
   tipo             TipoServico
   status           StatusServico @default(PENDENTE)
   descricao        String?
@@ -100,6 +106,7 @@ enum StatusServico {
   ACEITO
   EM_ANDAMENTO
   CONCLUIDO
+  ARQUIVADA
 }
 
 enum TipoPagamento {

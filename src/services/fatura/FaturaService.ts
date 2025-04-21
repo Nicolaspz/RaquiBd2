@@ -78,13 +78,31 @@ export class FaturaService {
   }
 
   async FecharFatura(faturaId: string) {
-    return await prisma.fatura.update({
-      where: { id: faturaId },
-      data: {
-        status: "FECHADA"
-      },
-    });
+  // Buscar a fatura com os serviços relacionados
+  const fatura = await prisma.fatura.findUnique({
+    where: { id: faturaId },
+    include: { servicos: true },
+  });
+
+  if (!fatura) throw new Error("Fatura não encontrada.");
+
+  // Verificar se existe algum serviço que não está CONCLUIDO
+  const possuiServicosNaoConcluidos = fatura.servicos.some(
+    servico => servico.status !== "CONCLUIDO"
+  );
+
+  if (possuiServicosNaoConcluidos) {
+    throw new Error("não pode");
   }
+
+  // Atualizar o status da fatura
+  return await prisma.fatura.update({
+    where: { id: faturaId },
+    data: { status: "FECHADA" },
+  });
+}
+
+
 
   // Verificar vencimento das faturas e enviar SMS
 

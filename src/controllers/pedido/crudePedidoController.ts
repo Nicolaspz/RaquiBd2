@@ -2,8 +2,6 @@ import { Request, Response } from "express";
 import { ServicoService } from "../../services/servic/ServicoService"; // ajuste o caminho conforme necessário
 
 class crudePedidoController {
-  
-
   // Método para criar um novo serviço
   async create(req: Request, res: Response) {
     try {
@@ -100,6 +98,28 @@ class crudePedidoController {
       return res.status(400).json({ error: error.message });
     }
   }
+
+  async ArquhivePedido(req: Request, res: Response) {
+    const {id} = req.params;
+    try {
+      const servicoService = new ServicoService();
+      const servico = await servicoService.archiveServico(id);
+      return res.status(200).json(servico); // Retorna o serviço atualizado
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
+    }
+  }
+  async RecPedido(req: Request, res: Response) {
+    const {id} = req.params;
+    try {
+      const servicoService = new ServicoService();
+      const servico = await servicoService.reabrirServicoEAssociarAFatura(id);
+      return res.status(200).json(servico); // Retorna o serviço atualizado
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
+    }
+  }
+
 }
 
 export { crudePedidoController }

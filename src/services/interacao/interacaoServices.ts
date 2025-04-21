@@ -13,88 +13,57 @@ interface InteracaoData {
 
 export class InteracaoService {
     async create({ conteudo, autorId, servicoId, tipo }: InteracaoData) {
-      // Verificar se o serviço já possui interações
-      const servico = await prisma.servico.findUnique({
-        where: { id: servicoId },
-        include: {
-          Interacao: true,
-          Fatura: true
-        },
-      });
+  // Buscar o serviço com interações e fatura
+  const servico = await prisma.servico.findUnique({
+    where: { id: servicoId },
+    include: {
+      Interacao: true,
+      Fatura: true
+    },
+  });
 
-      if (!servico) throw new Error("Serviço não encontrado.");
+  if (!servico) throw new Error("Serviço não encontrado.");
 
-      // Caso já tenha interações, apenas adicionar a interação
-      
-       const interacao = await prisma.interacao.create({
-         data: { conteudo, autorId, servicoId, tipo },
-          include: {
-            autor: true,
-            servico: { include: { usuario: true } }
-          }
-       });
-      const usuario = await prisma.user.findUnique({
-        where: { id: servico.usuarioId},
-      });
-      
-      const isAdmin = interacao.autor.role === 'ADMIN';
-      const destino = isAdmin ? usuario.telefone : "938654617";
-      const mensagem = isAdmin 
-      ? `Atualização do pedido: ${interacao.conteudo}`
-      : `Novo comentário de ${interacao.autor.name}: ${interacao.conteudo}`;
-      // Enviar notificação SMS para o usuário relacionado ao serviço
-      
-      if (!usuario) throw new Error("Usuário relacionado ao serviço não encontrado.");
+  // Buscar usuário relacionado ao serviço
+  const usuario = await prisma.user.findUnique({
+    where: { id: servico.usuarioId },
+  });
 
-      try {
-          const smsSent = await sendSmsToAdminFactu({
-            message: mensagem,
-            userPhone: destino,
-          });
+  if (!usuario) throw new Error("Usuário relacionado ao serviço não encontrado.");
 
-          if (!smsSent) {
-            console.log("Erro")
-          }
+  // 👉 Verificar se é a primeira interação
+  if (servico.Interacao.length === 0) {
+    let faturaAberta = null;
 
-          
-        } catch (error) {
-        
-        }
+    if (servico.tipo === "SERVICO_24h" || servico.tipo === "SERVICO_30_DIAS") {
+      const numeroFatura = this.gerarNumeroFatura();
+      const dataVencimento = this.calcularVencimentoPorTipo(servico.tipo);
 
-      // Lógica para criação de fatura
-      let faturaAberta = null;
-
-        if (servico.tipo === "SERVICO_24h" || servico.tipo === "SERVICO_30_DIAS") {
-          // Sempre criar uma nova fatura para esses tipos de serviço
-          const numeroFatura = this.gerarNumeroFatura();
-          const dataVencimento = this.calcularVencimentoPorTipo(servico.tipo);
-          
-          faturaAberta = await prisma.fatura.create({
-            data: {
-              numero: numeroFatura,
-              usuarioId: servico.usuarioId,
-              data_vencimento: dataVencimento,
-              servicos: { connect: { id: servicoId } },
-            },
-          });
-        } else {
-      // Para outros serviços, verificar se existe fatura aberta
-      faturaAberta = await prisma.fatura.findFirst({
-        where: {
+      faturaAberta = await prisma.fatura.create({
+        data: {
+          numero: numeroFatura,
           usuarioId: servico.usuarioId,
-          status: "ABERTA",
-          servicos: {
-            none: {
-              tipo: { in: ["SERVICO_24h", "SERVICO_30_DIAS"] },
-            },
-          },
+          data_vencimento: dataVencimento,
+          servicos: { connect: { id: servicoId } },
         },
       });
+    } else {
+            faturaAberta = await prisma.fatura.findFirst({
+              where: {
+                usuarioId: servico.usuarioId,
+                status: "ABERTA",
+                servicos: {
+                  none: {
+                    tipo: { in: ["SERVICO_24h", "SERVICO_30_DIAS"] },
+                  },
+                },
+            },
+          });
 
       if (!faturaAberta) {
-        // Criar nova fatura caso não exista nenhuma aberta ou se a aberta for do tipo 24h ou 30 dias
         const numeroFatura = this.gerarNumeroFatura();
         const dataVencimento = this.calcularVencimento(usuario.tipo_pagamento);
+
         faturaAberta = await prisma.fatura.create({
           data: {
             numero: numeroFatura,
@@ -104,24 +73,53 @@ export class InteracaoService {
           },
         });
       } else {
-        // Vincular o serviço à fatura existente
         await prisma.servico.update({
           where: { id: servicoId },
           data: { faturaId: faturaAberta.id },
         });
       }
-      }
-      return interacao;
+    }
+  }
 
-  
+  // Criar a interação
+  const interacao = await prisma.interacao.create({
+    data: { conteudo, autorId, servicoId, tipo },
+    include: {
+      autor: true,
+      servico: { include: { usuario: true } }
+    }
+  });
+
+  // Enviar notificação
+  const isAdmin = interacao.autor.role === 'ADMIN';
+  const destino = isAdmin ? usuario.telefone : "938654617";
+  const mensagem = isAdmin
+    ? `Atualização do pedido: ${interacao.conteudo}`
+    : `Novo comentário de ${interacao.autor.name}: ${interacao.conteudo}`;
+
+  try {
+    const smsSent = await sendSmsToAdminFactu({
+      message: mensagem,
+      userPhone: destino,
+    });
+
+    if (!smsSent) console.log("Erro ao enviar SMS");
+  } catch (error) {
+    console.error("Erro no envio de SMS:", error);
+  }
+
+  return interacao;
 }
+
 
 // Gerar número de fatura (método auxiliar)
 private gerarNumeroFatura(): string {
   const dataPrefixo = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // Ex: 20241129
   const numeroAleatorio = Math.floor(10 + Math.random() * 90); // Garante 2 dígitos aleatórios
   return `FO-${dataPrefixo}${numeroAleatorio}`;
-}
+  }
+  
+  
 
 // Calcular vencimento por tipo de serviço (método auxiliar)
 private calcularVencimentoPorTipo(tipo: string): Date {
