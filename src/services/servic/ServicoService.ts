@@ -257,7 +257,7 @@ class ServicoService {
 
   // Se for do tipo especial (24h ou 30 dias), cria fatura exclusiva
   if (servico.tipo === "SERVICO_24h" || servico.tipo === "SERVICO_30_DIAS") {
-    const numeroFatura = this.gerarNumeroFatura(); // Gere como achar melhor
+    const numeroFatura = await this.gerarNumeroFatura(); // Gere como achar melhor
     const dataVencimento = new Date(); // Agora
     dataVencimento.setDate(dataVencimento.getDate() + 1); // +1 dia
 
@@ -287,7 +287,7 @@ class ServicoService {
     });
 
     if (!faturaAberta) {
-      const numeroFatura = this.gerarNumeroFatura();
+      const numeroFatura = await this.gerarNumeroFatura();
       const dataVencimento = new Date();
       dataVencimento.setDate(dataVencimento.getDate() + 1); // +1 dia
 
@@ -324,11 +324,35 @@ class ServicoService {
   return servicoAtualizado;
   }
   
-  private gerarNumeroFatura(): string {
-  const dataPrefixo = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // Ex: 20241129
-  const numeroAleatorio = Math.floor(10 + Math.random() * 90); // Garante 2 dígitos aleatórios
-  return `FO-${dataPrefixo}${numeroAleatorio}`;
+  public async gerarNumeroFatura(): Promise<string> {
+  // Buscar a última fatura registrada no banco de dados
+  const ultimaFatura = await prismaClient.fatura.findFirst({
+    orderBy: {
+      numero: 'desc', // Ordena pela maior fatura
+    },
+    select: {
+      numero: true, // Pega só o número da fatura
+    },
+  });
+
+  // Se não houver faturas, retorna FO0001 como o primeiro número
+  if (!ultimaFatura) {
+    return 'FO0001';
   }
+
+  // Extrair o número da fatura (removendo o prefixo 'FO')
+  const ultimoNumero = parseInt(ultimaFatura.numero.replace('FO', ''), 10);
+
+  // Incrementar o número
+  const novoNumero = ultimoNumero + 1;
+
+  // Formatar o número com 4 dígitos, com 0 à esquerda se necessário
+  
+
+  // Retornar o novo número de fatura com o prefixo 'FO'
+  return `FO${novoNumero}`;
+}
+
 
 
   async listByUsuario(usuarioId: string) {

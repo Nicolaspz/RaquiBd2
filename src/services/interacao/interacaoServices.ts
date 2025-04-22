@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import moment from "moment";
 import { sendSmsToAdminFactu } from '../../utils/smsService'
+import prismaClient from "../../prisma";
 
 const prisma = new PrismaClient();
 
@@ -36,7 +37,7 @@ export class InteracaoService {
     let faturaAberta = null;
 
     if (servico.tipo === "SERVICO_24h" || servico.tipo === "SERVICO_30_DIAS") {
-      const numeroFatura = this.gerarNumeroFatura();
+      const numeroFatura = await this.gerarNumeroFatura();
       const dataVencimento = this.calcularVencimentoPorTipo(servico.tipo);
 
       faturaAberta = await prisma.fatura.create({
@@ -61,7 +62,7 @@ export class InteracaoService {
           });
 
       if (!faturaAberta) {
-        const numeroFatura = this.gerarNumeroFatura();
+        const numeroFatura = await this.gerarNumeroFatura();
         const dataVencimento = this.calcularVencimento(usuario.tipo_pagamento);
 
         faturaAberta = await prisma.fatura.create({
@@ -113,11 +114,35 @@ export class InteracaoService {
 
 
 // Gerar número de fatura (método auxiliar)
-private gerarNumeroFatura(): string {
-  const dataPrefixo = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // Ex: 20241129
-  const numeroAleatorio = Math.floor(10 + Math.random() * 90); // Garante 2 dígitos aleatórios
-  return `FO-${dataPrefixo}${numeroAleatorio}`;
+async gerarNumeroFatura(): Promise<string> {
+  // Buscar a última fatura registrada no banco de dados
+  const ultimaFatura = await prismaClient.fatura.findFirst({
+    orderBy: {
+      numero: 'desc', // Ordena pela maior fatura
+    },
+    select: {
+      numero: true, // Pega só o número da fatura
+    },
+  });
+
+  // Se não houver faturas, retorna FO0001 como o primeiro número
+  if (!ultimaFatura) {
+    return 'FO1';
   }
+
+  // Extrair o número da fatura (removendo o prefixo 'FO')
+ const ultimoNumero = parseInt(ultimaFatura.numero.replace('FO', ''), 10);
+
+  // Incrementar o número
+  const novoNumero = ultimoNumero + 1;
+
+  // Formatar o número com 4 dígitos, com 0 à esquerda se necessário
+  
+
+  // Retornar o novo número de fatura com o prefixo 'FO'
+  return `FO${novoNumero}`;
+}
+
   
   
 
