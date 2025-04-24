@@ -95,7 +95,7 @@ export class InteracaoService {
   const isAdmin = interacao.autor.role === 'ADMIN';
   const destino = isAdmin ? usuario.telefone : "938654617";
   const mensagem = isAdmin
-    ? `Atualização do pedido: ${interacao.conteudo}`
+    ? `Atualização do pedido ${servico.numero} : ${interacao.conteudo}`
     : `Novo comentário de ${interacao.autor.name}: ${interacao.conteudo}`;
 
   try {
